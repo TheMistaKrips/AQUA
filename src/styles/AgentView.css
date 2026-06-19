@@ -181,6 +181,7 @@
     line-height: 1.5;
     color: var(--text-primary);
     white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .chat-msg.user .msg-bubble {
@@ -223,10 +224,11 @@
 }
 
 .chat-input-wrapper {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     border-top: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
+    flex-shrink: 0;
 }
 
 .chat-attachments-preview {
@@ -300,10 +302,14 @@
     padding: 12px;
     min-height: 44px;
     max-height: 120px;
-    resize: vertical;
+    resize: none;
     outline: none;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 14px;
+}
+
+.chat-input-area textarea:focus {
+    border-color: var(--accent-aqua);
 }
 
 .send-msg-btn {
@@ -364,14 +370,14 @@
     .agent-sidebar {
         width: 100%;
         min-width: 100%;
-        height: 50vh;
+        height: 50dvh;
         border-right: none;
         border-top: 1px solid var(--glass-border);
         border-radius: 0 0 16px 16px;
     }
 
     .agent-content-area {
-        height: 50vh;
+        height: 50dvh;
         flex: none;
     }
 
@@ -384,13 +390,28 @@
         padding: 16px;
     }
 
+    .chat-input-wrapper {
+        background: rgba(10, 14, 23, 0.95);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
     .chat-input-area {
-        padding: 8px;
+        padding: 10px;
+        gap: 8px;
     }
 
     .chat-input-area textarea {
+        font-size: 16px;
+        /* ВАЖНО: 16px предотвращает автозум в iOS Safari при клике на инпут */
+        padding: 10px 12px;
         min-height: 40px;
-        padding: 10px;
+        max-height: 80px;
+    }
+
+    .chat-attach-btn,
+    .send-msg-btn {
+        width: 40px;
+        height: 40px;
     }
 
     .base-refs-section {
