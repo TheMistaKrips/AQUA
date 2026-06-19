@@ -139,7 +139,7 @@
     }
 
     .modal-image {
-        max-height: 65dvh;
+        max-height: 60dvh;
         /* Уменьшили высоту, чтобы не конфликтовать с крестиком */
         border-radius: 12px;
     }
