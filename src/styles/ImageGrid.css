@@ -1,28 +1,26 @@
 .image-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--grid-scale, 220px), 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-scale, 250px), 1fr));
     gap: 20px;
     width: 100%;
     padding-bottom: 40px;
 }
 
-.image-card-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
 .image-card {
     position: relative;
-    border-radius: 12px;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    border-radius: 16px;
     overflow: hidden;
-    aspect-ratio: auto;
-    cursor: zoom-in;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.3);
     border: 1px solid var(--glass-border);
-    transition: border-color 0.3s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .image-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(56, 189, 248, 0.15);
     border-color: rgba(56, 189, 248, 0.3);
 }
 
@@ -33,90 +31,22 @@
     display: block;
 }
 
-.card-badge {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 10px;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-/* Действия при наведении */
-.hover-actions {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: flex;
-    gap: 4px;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: all 0.2s;
-}
-
-.image-card:hover .hover-actions {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.hover-actions button {
-    background: rgba(18, 22, 30, 0.8);
-    color: var(--text-primary);
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(4px);
-}
-
-.hover-actions button:hover {
-    background: var(--accent-aqua);
-    color: var(--bg-dark);
-}
-
-/* Название под картинкой */
-.image-name-bar {
-    font-size: 13px;
-    color: var(--text-secondary);
-    text-align: center;
-}
-
-.image-name-bar span {
-    cursor: pointer;
-    user-select: none;
-}
-
-.image-name-bar span:hover {
-    color: var(--text-primary);
-}
-
-.image-name-bar input {
+.generating-placeholder,
+.empty-placeholder {
     width: 100%;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
-    color: white;
-    padding: 4px;
-    border-radius: 4px;
-    text-align: center;
-    outline: none;
-    font-size: 13px;
-}
-
-.generating-skeleton {
+    height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 12px;
-    border: 1px dashed var(--glass-border);
-    min-height: var(--grid-scale);
+    color: var(--text-secondary);
+    gap: 12px;
 }
 
-.aqua-spinner {
-    width: 40px;
-    height: 40px;
-    border: 2px solid transparent;
+.loader {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--glass-border);
     border-top-color: var(--accent-aqua);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -126,4 +56,88 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+.card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10, 14, 23, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid var(--glass-border);
+    padding: 8px 12px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.image-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.name-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.img-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.card-actions button {
+    color: var(--text-secondary);
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.card-actions button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.card-actions .del-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+}
+
+.name-edit {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+
+.name-edit input {
+    flex-grow: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--accent-aqua);
+    color: white;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 13px;
+    outline: none;
+    min-width: 50px;
+}
+
+.save-btn {
+    color: var(--accent-aqua);
+    padding: 4px;
+}
+
+.cancel-btn {
+    color: var(--danger);
+    padding: 4px;
 }
