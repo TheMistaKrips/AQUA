@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-// ИМПОРТИРУЕМ СЕТКУ
 import ImageGrid from './ImageGrid';
 import { Upload, X, Send, Bot, User, Image as ImageIcon } from 'lucide-react';
 import { chatWithAgent, generateImages } from '../api/gemini';
@@ -16,18 +15,6 @@ export default function AgentView({
     const chatContainerRef = useRef(null);
     const fileInputRef = useRef(null);
     const chatAttachInputRef = useRef(null);
-
-    // Слушаем ресайз окна для мобильной адаптации сайдбара
-    const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
-
-    useEffect(() => {
-        const handleResize = () => {
-            if (window.innerWidth <= 768) setSidebarOpen(false);
-            else setSidebarOpen(true);
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
 
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -175,10 +162,7 @@ export default function AgentView({
 
     return (
         <div className="agent-view">
-            {/* Затемненный фон для мобилок */}
-            <div className={`sidebar-backdrop ${isSidebarOpen ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}></div>
-
-            <div className={`agent-sidebar glass-panel ${isSidebarOpen ? 'open' : 'closed'}`}>
+            <div className="agent-sidebar glass-panel">
                 <div className="base-refs-section">
                     <div className="section-header">
                         <h4>Базовые референсы</h4>
@@ -262,14 +246,9 @@ export default function AgentView({
 
             <div className="agent-content-area">
                 <div className="view-header">
-                    {/* Гамбургер меню для мобилок */}
-                    <button className="toggle-sidebar-btn" onClick={() => setSidebarOpen(!isSidebarOpen)}>
-                        <Bot size={20} />
-                    </button>
                     <div className="project-title">{project.name} <span className="agent-badge">AI-Продюсер</span></div>
                 </div>
                 <div className="grid-scroll-area">
-                    {/* ВЫЗЫВАЕМ СЕТКУ. GridScale ставим статично 250, т.к. в Агент-режиме нет ползунка */}
                     <ImageGrid
                         images={project.images}
                         onImageClick={onImageClick}

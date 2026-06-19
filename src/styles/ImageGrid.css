@@ -1,8 +1,9 @@
 .image-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--grid-scale), 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(var(--grid-scale, 220px), 1fr));
+    gap: 20px;
     width: 100%;
+    padding-bottom: 40px;
 }
 
 .image-card-wrapper {
