@@ -126,7 +126,7 @@
 /* МОБИЛЬНАЯ ВЕРСИЯ МОДАЛКИ */
 @media (max-width: 768px) {
     .modal-backdrop {
-        padding: 16px;
+        padding: 20px;
         /* Оставляем отступы от краев экрана */
     }
 
@@ -139,7 +139,7 @@
     }
 
     .modal-image {
-        max-height: 60dvh;
+        max-height: 50dvh;
         /* Уменьшили высоту, чтобы не конфликтовать с крестиком */
         border-radius: 12px;
     }
