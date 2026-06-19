@@ -54,7 +54,15 @@
     letter-spacing: 2px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+}
+
+.logo-image {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    /* Оставляем неоновое свечение, чтобы логотип тоже светился голубым */
+    filter: drop-shadow(0 0 8px var(--accent-aqua));
 }
 
 .logo-icon {

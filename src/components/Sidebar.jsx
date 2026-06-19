@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, PanelLeftClose, PanelLeft, Folder, Edit2, Trash2, Check, Bot } from 'lucide-react';
 import '../styles/Sidebar.css';
+// ИМПОРТИРУЕМ ТВОЙ ЛОГОТИП (проверь, чтобы путь и регистр букв точно совпадали)
+import aquaLogo from '../assets/AQUA.png';
 
 export default function Sidebar({ projects, activeProjectId, setActiveProjectId, createProject, renameProject, deleteProject, isOpen, toggleSidebar }) {
     const [editingId, setEditingId] = useState(null);
@@ -27,7 +29,9 @@ export default function Sidebar({ projects, activeProjectId, setActiveProjectId,
             <div className={`sidebar glass-panel ${isOpen ? '' : 'closed'}`}>
                 <div className="sidebar-header">
                     <div className="logo">
-                        <span className="logo-icon">▲</span> AQUA
+                        {/* ВСТАВЛЯЕМ КАРТИНКУ ВМЕСТО ТРЕУГОЛЬНИКА */}
+                        <img src={aquaLogo} alt="AQUA Logo" className="logo-image" />
+                        AQUA
                     </div>
                 </div>
 
@@ -36,7 +40,7 @@ export default function Sidebar({ projects, activeProjectId, setActiveProjectId,
                         <Plus size={16} /> Проект
                     </button>
                     <button className="new-agent-btn" onClick={() => createProject('agent')}>
-                        <Bot size={16} /> Агент-режим (BETA)
+                        <Bot size={16} /> Агент-режим
                     </button>
                 </div>
 
