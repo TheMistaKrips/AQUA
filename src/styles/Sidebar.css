@@ -1,3 +1,7 @@
+.sidebar-backdrop {
+    display: none;
+}
+
 .sidebar {
     width: 280px;
     background: var(--glass-bg);
@@ -22,11 +26,12 @@
     border: none;
 }
 
+/* Кнопка Гамбургера */
 .toggle-sidebar-btn {
     position: absolute;
-    top: 32px;
-    left: 32px;
-    z-index: 100;
+    top: 24px;
+    left: 24px;
+    z-index: 1001;
     color: var(--text-primary);
     background: var(--glass-bg);
     backdrop-filter: blur(10px);
@@ -35,12 +40,13 @@
     padding: 8px;
     display: flex;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: left 0.4s ease;
 }
 
 .toggle-sidebar-btn.open {
-    left: 250px;
-    opacity: 0;
-    pointer-events: none;
+    left: 260px;
+    opacity: 1;
+    pointer-events: all;
 }
 
 .sidebar-header {
@@ -48,6 +54,7 @@
     padding-left: 8px;
 }
 
+/* КРУГЛЫЙ ЛОГОТИП AQUA */
 .logo {
     font-size: 20px;
     font-weight: 700;
@@ -58,19 +65,15 @@
 }
 
 .logo-image {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    /* Оставляем неоновое свечение, чтобы логотип тоже светился голубым */
-    filter: drop-shadow(0 0 8px var(--accent-aqua));
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 225, 255, 0.4);
+    box-shadow: 0 0 12px rgba(0, 225, 255, 0.4);
+    background-color: var(--bg-dark);
 }
 
-.logo-icon {
-    color: var(--accent-aqua);
-    filter: drop-shadow(0 0 8px var(--accent-aqua));
-}
-
-/* Кнопки создания проектов */
 .sidebar-actions {
     display: flex;
     gap: 8px;
@@ -206,4 +209,62 @@
 
 .edit-mode button {
     color: var(--accent-aqua);
+}
+
+/* АДАПТАЦИЯ САЙДБАРА ПОД МОБИЛКИ */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1000;
+        width: 280px;
+        border-radius: 0 24px 24px 0;
+        margin: 0 !important;
+        transform: translateX(-100%);
+        opacity: 1 !important;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar.closed {
+        transform: translateX(-100%);
+        width: 280px;
+    }
+
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+
+    .sidebar-backdrop.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .toggle-sidebar-btn {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 1001;
+    }
+
+    .toggle-sidebar-btn.open {
+        left: 230px;
+    }
+
+    /* Смещаем кнопку внутрь открытого меню */
 }

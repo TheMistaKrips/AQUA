@@ -5,17 +5,11 @@
     position: relative;
 }
 
-/* Бегущая линия без эффекта часов */
 .input-bar-wrapper {
     position: relative;
     padding: 1px;
-    /* Толщина обводки */
     border-radius: 21px;
-    /* Плавный линейный градиент для обводки */
-    background: linear-gradient(90deg,
-            rgba(255, 255, 255, 0.05) 0%,
-            rgba(56, 189, 248, 0.6) 50%,
-            rgba(255, 255, 255, 0.05) 100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0%, rgba(56, 189, 248, 0.6) 50%, rgba(255, 255, 255, 0.05) 100%);
     background-size: 200% 100%;
     animation: borderFlow 3s linear infinite;
 }
@@ -160,4 +154,41 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* МОБИЛЬНАЯ АДАПТАЦИЯ ВВОДА ПРОМПТА */
+@media (max-width: 768px) {
+    .chat-container {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .input-bar {
+        padding: 4px 6px;
+        border-radius: 16px;
+    }
+
+    .input-bar-wrapper {
+        border-radius: 17px;
+    }
+
+    .input-bar input[type="text"] {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    .icon-btn,
+    .send-btn {
+        width: 36px;
+        height: 36px;
+        padding: 8px;
+    }
+
+    .settings-panel {
+        left: 0;
+        right: 0;
+        width: 100%;
+        bottom: 65px;
+        z-index: 10;
+    }
 }

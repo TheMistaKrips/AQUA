@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, PanelLeftClose, PanelLeft, Folder, Edit2, Trash2, Check, Bot } from 'lucide-react';
+import { Plus, Folder, Edit2, Trash2, Check, Bot, Menu, X } from 'lucide-react';
 import '../styles/Sidebar.css';
-// ИМПОРТИРУЕМ ТВОЙ ЛОГОТИП (проверь, чтобы путь и регистр букв точно совпадали)
 import aquaLogo from '../assets/AQUA.png';
 
 export default function Sidebar({ projects, activeProjectId, setActiveProjectId, createProject, renameProject, deleteProject, isOpen, toggleSidebar }) {
@@ -22,14 +21,17 @@ export default function Sidebar({ projects, activeProjectId, setActiveProjectId,
 
     return (
         <>
-            <button className={`toggle-sidebar-btn ${isOpen ? 'open' : ''}`} onClick={toggleSidebar}>
-                {isOpen ? <PanelLeftClose size={20} /> : <PanelLeft size={20} />}
+            {/* Затемненный фон для мобилок */}
+            <div className={`sidebar-backdrop ${isOpen ? 'active' : ''}`} onClick={toggleSidebar}></div>
+
+            {/* Гамбургер меню */}
+            <button className={`toggle-sidebar-btn ${isOpen ? 'open' : 'closed'}`} onClick={toggleSidebar}>
+                {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
 
-            <div className={`sidebar glass-panel ${isOpen ? '' : 'closed'}`}>
+            <div className={`sidebar glass-panel ${isOpen ? 'open' : 'closed'}`}>
                 <div className="sidebar-header">
                     <div className="logo">
-                        {/* ВСТАВЛЯЕМ КАРТИНКУ ВМЕСТО ТРЕУГОЛЬНИКА */}
                         <img src={aquaLogo} alt="AQUA Logo" className="logo-image" />
                         AQUA
                     </div>
@@ -40,7 +42,7 @@ export default function Sidebar({ projects, activeProjectId, setActiveProjectId,
                         <Plus size={16} /> Проект
                     </button>
                     <button className="new-agent-btn" onClick={() => createProject('agent')}>
-                        <Bot size={16} /> Агент-режим
+                        <Bot size={16} /> Агент
                     </button>
                 </div>
 

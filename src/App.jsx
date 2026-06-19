@@ -9,11 +9,23 @@ import './styles/App.css';
 export default function App() {
   const [projects, setProjects] = useState([]);
   const [activeProjectId, setActiveProjectId] = useState(null);
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+
+  // Автоматически определяем мобильное устройство для сайдбара
+  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [restorePromptData, setRestorePromptData] = useState(null);
+
+  // Слушаем ресайз окна
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) setSidebarOpen(false);
+      else setSidebarOpen(true);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     localforage.getItem('aqua_projects').then(savedProjects => {
@@ -37,6 +49,14 @@ export default function App() {
 
   const activeProject = projects.find(p => p.id === activeProjectId);
 
+  // Умный выбор проекта (закрывает меню на мобилках)
+  const handleProjectSelect = (id) => {
+    setActiveProjectId(id);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   const createProject = (type = 'standard') => {
     const newProject = {
       id: Date.now(),
@@ -46,9 +66,8 @@ export default function App() {
       baseRefs: [],
       chatHistory: []
     };
-    // Здесь можно использовать прямое добавление, так как это синхронное действие
     setProjects(prev => [...prev, newProject]);
-    setActiveProjectId(newProject.id);
+    handleProjectSelect(newProject.id);
   };
 
   const renameProject = (id, newName) => {
@@ -65,14 +84,12 @@ export default function App() {
     });
   };
 
-  // ИСПРАВЛЕНО: Безопасное добавление картинок
   const addImagesToProject = (projectId, newImages) => {
     setProjects(prevProjects => prevProjects.map(p =>
       p.id === projectId ? { ...p, images: [...newImages, ...p.images] } : p
     ));
   };
 
-  // ИСПРАВЛЕНО: Безопасная подмена плейсхолдеров (решает проблему перетирания)
   const replacePlaceholders = (projectId, placeholderIds, newImages) => {
     setProjects(prevProjects => prevProjects.map(p => {
       if (p.id !== projectId) return p;
@@ -99,7 +116,6 @@ export default function App() {
     setSelectedImage(null);
   };
 
-  // ИСПРАВЛЕНО: Безопасное обновление данных проекта (чат, база рефов)
   const updateProjectData = (projectId, newData) => {
     setProjects(prevProjects => prevProjects.map(p =>
       p.id === projectId ? { ...p, ...newData } : p
@@ -131,7 +147,7 @@ export default function App() {
       <Sidebar
         projects={projects}
         activeProjectId={activeProjectId}
-        setActiveProjectId={setActiveProjectId}
+        setActiveProjectId={handleProjectSelect}
         createProject={createProject}
         renameProject={renameProject}
         deleteProject={deleteProject}

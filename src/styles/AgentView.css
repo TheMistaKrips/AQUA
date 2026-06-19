@@ -4,10 +4,8 @@
     width: 100%;
     overflow: hidden;
     min-height: 0;
-    /* Запрещает контейнеру растягиваться за пределы экрана */
 }
 
-/* ЛЕВАЯ ПАНЕЛЬ */
 .agent-sidebar {
     width: 350px;
     min-width: 350px;
@@ -116,7 +114,6 @@
     color: var(--danger);
 }
 
-/* ЧАТ С АГЕНТОМ */
 .agent-chat-section {
     flex-grow: 1;
     display: flex;
@@ -225,29 +222,6 @@
     }
 }
 
-/* ВВОД ЧАТА */
-.chat-input-area {
-    padding: 16px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-    flex-shrink: 0;
-}
-
-.del-attach-btn {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: var(--danger);
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .chat-input-wrapper {
     background: rgba(0, 0, 0, 0.2);
     border-top: 1px solid var(--glass-border);
@@ -277,19 +251,26 @@
     border: 1px solid var(--glass-border);
 }
 
-.chat-input-area textarea {
-    flex-grow: 1;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
+.del-attach-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--danger);
     color: white;
-    border-radius: 12px;
-    padding: 12px;
-    min-height: 44px;
-    max-height: 120px;
-    resize: vertical;
-    outline: none;
-    font-family: inherit;
-    font-size: 13px;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-input-area {
+    padding: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-shrink: 0;
 }
 
 .chat-attach-btn {
@@ -308,6 +289,21 @@
 .chat-attach-btn:hover {
     background: rgba(0, 225, 255, 0.15);
     color: var(--accent-aqua);
+}
+
+.chat-input-area textarea {
+    flex-grow: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 44px;
+    max-height: 120px;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
 }
 
 .send-msg-btn {
@@ -332,7 +328,6 @@
     color: var(--text-secondary);
 }
 
-/* ПРАВАЯ ПАНЕЛЬ */
 .agent-content-area {
     flex-grow: 1;
     display: flex;
@@ -357,4 +352,48 @@
     flex-grow: 1;
     overflow-y: auto;
     padding: 32px;
+}
+
+/* АДАПТАЦИЯ АГЕНТ-РЕЖИМА ПОД МОБИЛКИ */
+@media (max-width: 768px) {
+    .agent-view {
+        flex-direction: column-reverse;
+    }
+
+    /* Сетка сверху, чат снизу */
+    .agent-sidebar {
+        width: 100%;
+        min-width: 100%;
+        height: 50vh;
+        border-right: none;
+        border-top: 1px solid var(--glass-border);
+        border-radius: 0 0 16px 16px;
+    }
+
+    .agent-content-area {
+        height: 50vh;
+        flex: none;
+    }
+
+    .view-header {
+        padding: 16px 16px 16px 64px;
+        height: auto;
+    }
+
+    .grid-scroll-area {
+        padding: 16px;
+    }
+
+    .chat-input-area {
+        padding: 8px;
+    }
+
+    .chat-input-area textarea {
+        min-height: 40px;
+        padding: 10px;
+    }
+
+    .base-refs-section {
+        padding: 16px;
+    }
 }
