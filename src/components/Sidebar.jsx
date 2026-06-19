@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Plus, Folder, Edit2, Trash2, Check, Bot, Menu, X } from 'lucide-react';
+import { Plus, Folder, Edit2, Trash2, Check, Bot } from 'lucide-react';
 import '../styles/Sidebar.css';
-import aquaLogo from '../assets/AQUA.png';
 
 export default function Sidebar({ projects, activeProjectId, setActiveProjectId, createProject, renameProject, deleteProject, isOpen, toggleSidebar }) {
     const [editingId, setEditingId] = useState(null);
@@ -21,20 +20,9 @@ export default function Sidebar({ projects, activeProjectId, setActiveProjectId,
 
     return (
         <>
-            {/* Затемненный фон для мобилок */}
-            <div className={`sidebar-backdrop ${isOpen ? 'active' : ''}`} onClick={toggleSidebar}></div>
-
-            {/* Гамбургер меню */}
-            <button className={`toggle-sidebar-btn ${isOpen ? 'open' : 'closed'}`} onClick={toggleSidebar}>
-                {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-
-            <div className={`sidebar glass-panel ${isOpen ? 'open' : 'closed'}`}>
+            <div className={`sidebar glass-panel ${isOpen ? '' : 'closed'}`}>
                 <div className="sidebar-header">
-                    <div className="logo">
-                        <img src={aquaLogo} alt="AQUA Logo" className="logo-image" />
-                        AQUA
-                    </div>
+                    <div className="logo">AQUA</div>
                 </div>
 
                 <div className="sidebar-actions">

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// ИМПОРТИРУЕМ СЕТКУ (КОТОРАЯ ВНУТРИ ИМПОРТИРУЕТ КАРТОЧКУ)
 import ImageGrid from './ImageGrid';
 import ChatInput from './ChatInput';
 import { Search, X, ZoomIn, ZoomOut } from 'lucide-react';
@@ -12,10 +11,8 @@ export default function ProjectView({
 }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearchActive, setIsSearchActive] = useState(false);
-    // Масштаб сетки (в пикселях)
     const [gridScale, setGridScale] = useState(250);
 
-    // Фильтрация картинок по названию для поиска
     const filteredImages = project.images.filter(img =>
         img.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -26,7 +23,6 @@ export default function ProjectView({
                 <div className="project-title">{project.name}</div>
 
                 <div className="header-actions">
-                    {/* Блок поиска */}
                     <div className={`search-container ${isSearchActive ? 'active' : ''}`}>
                         <Search size={18} className="search-icon" onClick={() => setIsSearchActive(!isSearchActive)} />
                         <input
@@ -39,7 +35,6 @@ export default function ProjectView({
                         {searchTerm && <X size={16} className="clear-search" onClick={() => setSearchTerm('')} />}
                     </div>
 
-                    {/* Контроль масштаба сетки */}
                     <div className="grid-controls">
                         <ZoomOut size={16} onClick={() => setGridScale(Math.max(150, gridScale - 50))} />
                         <input
@@ -56,7 +51,6 @@ export default function ProjectView({
             </div>
 
             <div className="grid-scroll-area">
-                {/* ВЫЗЫВАЕМ СЕТКУ */}
                 <ImageGrid
                     images={filteredImages}
                     onImageClick={onImageClick}

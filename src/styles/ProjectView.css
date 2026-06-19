@@ -7,8 +7,7 @@
 
 .view-header {
     height: 70px;
-    padding: 0 32px 0 80px;
-    /* Отступ для бургер-меню */
+    padding: 0 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -117,34 +116,4 @@
 
 .chat-area {
     padding: 24px 32px 32px;
-}
-
-/* АДАПТАЦИЯ ОБЫЧНОГО ПРОЕКТА */
-@media (max-width: 768px) {
-    .view-header {
-        padding: 16px 16px 16px 64px;
-        /* Место под кнопку меню */
-        flex-direction: column;
-        align-items: flex-start;
-        height: auto;
-        gap: 16px;
-    }
-
-    .header-actions {
-        width: 100%;
-        justify-content: space-between;
-        gap: 10px;
-    }
-
-    .search-container.active {
-        width: 150px;
-    }
-
-    .content-area {
-        padding: 16px;
-    }
-
-    .chat-area {
-        padding: 16px 8px;
-    }
 }

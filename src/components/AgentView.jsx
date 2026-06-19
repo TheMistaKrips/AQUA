@@ -71,18 +71,19 @@ export default function AgentView({
             if (task.referenceNames && Array.isArray(task.referenceNames)) {
                 task.referenceNames.forEach(refName => {
                     const searchStr = refName.toLowerCase().trim();
+
                     const found = project.baseRefs.find(r => {
                         const rName = r.name.toLowerCase().trim();
                         return rName === searchStr || rName.includes(searchStr) || searchStr.includes(rName);
                     });
+
                     if (found) refsToUse.push(found.url);
                 });
             }
 
             for (let c = 0; c < count; c++) {
                 const id = Date.now() + Math.random() + c;
-                const baseName = task.name ? task.name : `Сцена ${idx + 1}`;
-                const name = count > 1 ? `${baseName} (Вар. ${c + 1})` : baseName;
+                const name = count > 1 ? `Сцена ${idx + 1} (Вар. ${c + 1})` : `Сцена ${idx + 1}`;
 
                 placeholders.push({ id, type: 'generating', name });
                 tasksData.push({ id, name, prompt: task.prompt, aspectRatio: task.aspectRatio || '16:9', refsToUse });

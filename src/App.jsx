@@ -9,23 +9,11 @@ import './styles/App.css';
 export default function App() {
   const [projects, setProjects] = useState([]);
   const [activeProjectId, setActiveProjectId] = useState(null);
-
-  // Автоматически определяем мобильное устройство для сайдбара
-  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [restorePromptData, setRestorePromptData] = useState(null);
-
-  // Слушаем ресайз окна
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth <= 768) setSidebarOpen(false);
-      else setSidebarOpen(true);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     localforage.getItem('aqua_projects').then(savedProjects => {
@@ -49,14 +37,6 @@ export default function App() {
 
   const activeProject = projects.find(p => p.id === activeProjectId);
 
-  // Умный выбор проекта (закрывает меню на мобилках)
-  const handleProjectSelect = (id) => {
-    setActiveProjectId(id);
-    if (window.innerWidth <= 768) {
-      setSidebarOpen(false);
-    }
-  };
-
   const createProject = (type = 'standard') => {
     const newProject = {
       id: Date.now(),
@@ -67,7 +47,7 @@ export default function App() {
       chatHistory: []
     };
     setProjects(prev => [...prev, newProject]);
-    handleProjectSelect(newProject.id);
+    setActiveProjectId(newProject.id);
   };
 
   const renameProject = (id, newName) => {
@@ -147,7 +127,7 @@ export default function App() {
       <Sidebar
         projects={projects}
         activeProjectId={activeProjectId}
-        setActiveProjectId={handleProjectSelect}
+        setActiveProjectId={setActiveProjectId}
         createProject={createProject}
         renameProject={renameProject}
         deleteProject={deleteProject}
