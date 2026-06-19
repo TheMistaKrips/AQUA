@@ -14,7 +14,13 @@ export default function ImageModal({ image, onClose, onDelete, onRegenerate, onU
 
     return (
         <div className="modal-backdrop" onClick={onClose}>
-            <button className="close-modal"><X size={32} /></button>
+            {/* ИСПРАВЛЕНИЕ: Добавлен явный onClick с остановкой всплытия */}
+            <button
+                className="close-modal"
+                onClick={(e) => { e.stopPropagation(); onClose(); }}
+            >
+                <X size={28} />
+            </button>
 
             <div className="modal-content" onClick={e => e.stopPropagation()}>
                 <img src={image.url} alt="Fullscreen" className="modal-image" />
@@ -30,7 +36,6 @@ export default function ImageModal({ image, onClose, onDelete, onRegenerate, onU
                         <CopyPlus size={20} /> <span>В промпт</span>
                     </button>
 
-                    {/* НОВАЯ КНОПКА: Добавление в Базовые Референсы Агента */}
                     {onAddToBaseRefs && (
                         <button className="action-btn" onClick={onAddToBaseRefs} title="Сохранить как Базовый Референс для Агента">
                             <BookmarkPlus size={20} /> <span>В Базовые Рефы</span>
