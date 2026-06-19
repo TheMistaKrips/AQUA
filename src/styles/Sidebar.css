@@ -1,0 +1,201 @@
+.sidebar {
+    width: 280px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--glass-glow);
+    flex-shrink: 0;
+}
+
+.sidebar.closed {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    margin-left: -16px;
+    overflow: hidden;
+    border: none;
+}
+
+.toggle-sidebar-btn {
+    position: absolute;
+    top: 32px;
+    left: 32px;
+    z-index: 100;
+    color: var(--text-primary);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-sidebar-btn.open {
+    left: 250px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sidebar-header {
+    margin-bottom: 24px;
+    padding-left: 8px;
+}
+
+.logo {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    color: var(--accent-aqua);
+    filter: drop-shadow(0 0 8px var(--accent-aqua));
+}
+
+/* Кнопки создания проектов */
+.sidebar-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.new-project-btn,
+.new-agent-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.new-project-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+}
+
+.new-project-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.new-agent-btn {
+    background: linear-gradient(135deg, rgba(0, 225, 255, 0.2), rgba(0, 163, 255, 0.1));
+    color: var(--accent-aqua);
+    border: 1px solid rgba(0, 225, 255, 0.2);
+}
+
+.new-agent-btn:hover {
+    background: rgba(0, 225, 255, 0.25);
+    box-shadow: 0 0 15px rgba(0, 225, 255, 0.2);
+}
+
+.list-title {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    padding-left: 8px;
+    letter-spacing: 1px;
+}
+
+.project-item {
+    padding: 12px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.project-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.project-item.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.project-item.agent-item.active {
+    background: rgba(0, 225, 255, 0.1);
+    color: var(--accent-aqua);
+    border-color: rgba(0, 225, 255, 0.15);
+}
+
+.proj-icon {
+    margin-right: 12px;
+    opacity: 0.7;
+}
+
+.proj-name {
+    flex-grow: 1;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.proj-actions {
+    display: none;
+    gap: 4px;
+}
+
+.project-item:hover .proj-actions {
+    display: flex;
+}
+
+.proj-actions button {
+    color: var(--text-secondary);
+    padding: 4px;
+    border-radius: 6px;
+}
+
+.proj-actions button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.proj-actions button.danger:hover {
+    color: var(--danger);
+    background: rgba(255, 71, 87, 0.1);
+}
+
+.edit-mode {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-mode input {
+    flex-grow: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--accent-aqua);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    width: 100px;
+}
+
+.edit-mode button {
+    color: var(--accent-aqua);
+}

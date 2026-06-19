@@ -1,0 +1,119 @@
+.project-view {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+}
+
+.view-header {
+    height: 70px;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.project-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Анимированный поиск */
+.search-container {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid transparent;
+    border-radius: 20px;
+    padding: 6px 12px;
+    width: 40px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-secondary);
+}
+
+.search-container.active {
+    width: 220px;
+    border-color: var(--glass-border);
+}
+
+.search-icon {
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.search-container input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    padding: 0 8px;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.search-container.active input {
+    opacity: 1;
+}
+
+.clear-search {
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.clear-search:hover {
+    color: white;
+}
+
+.grid-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-secondary);
+}
+
+.grid-controls input[type="range"] {
+    -webkit-appearance: none;
+    background: rgba(255, 255, 255, 0.05);
+    height: 2px;
+    border-radius: 2px;
+    width: 80px;
+    outline: none;
+}
+
+.grid-controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-aqua);
+    cursor: pointer;
+}
+
+.content-area {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 32px;
+    position: relative;
+}
+
+.placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-secondary);
+}
+
+.chat-area {
+    padding: 24px 32px 32px;
+}

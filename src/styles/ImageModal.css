@@ -1,0 +1,111 @@
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.close-modal {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    color: white;
+    padding: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-image {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 225, 255, 0.1);
+}
+
+.modal-actions {
+    position: absolute;
+    bottom: -80px;
+    display: flex;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 20px;
+    background: rgba(16, 22, 35, 0.8);
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-aqua);
+}
+
+.action-btn.danger:hover {
+    color: var(--danger);
+    background: rgba(255, 71, 87, 0.1);
+}
+
+.divider {
+    width: 1px;
+    background: var(--glass-border);
+    margin: 0 8px;
+}
+
+.modal-prompt {
+    position: absolute;
+    top: -60px;
+    background: rgba(16, 22, 35, 0.8);
+    padding: 12px 24px;
+    border-radius: 12px;
+    max-width: 600px;
+    text-align: center;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modal-prompt strong {
+    color: white;
+}
