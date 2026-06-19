@@ -4,7 +4,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    /* Прибиваем ко всем краям */
     background: rgba(10, 14, 23, 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -30,12 +29,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 10;
+    /* Картинка на слое ниже крестика */
 }
 
 .modal-image {
     max-width: 100%;
     max-height: 75dvh;
-    /* Динамическая высота */
     object-fit: contain;
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -46,17 +46,26 @@
     position: absolute;
     top: 24px;
     right: 24px;
-    color: var(--text-secondary);
-    background: rgba(0, 0, 0, 0.3);
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.6);
+    /* Темный фон для контраста */
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s;
+    z-index: 1000;
+    /* ЖЕЛЕЗОБЕТОННО ПОВЕРХ ВСЕГО */
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .close-modal:hover {
     color: white;
-    background: rgba(255, 255, 255, 0.1);
-    transform: rotate(90deg);
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg) scale(1.1);
 }
 
 .modal-actions {
@@ -117,26 +126,30 @@
 /* МОБИЛЬНАЯ ВЕРСИЯ МОДАЛКИ */
 @media (max-width: 768px) {
     .modal-backdrop {
-        padding: 0;
+        padding: 16px;
+        /* Оставляем отступы от краев экрана */
     }
 
     .modal-content {
         width: 100%;
         height: 100%;
         justify-content: center;
+        padding-bottom: 70px;
+        /* Место под нижнюю панель кнопок */
     }
 
     .modal-image {
-        max-height: 85dvh;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
+        max-height: 65dvh;
+        /* Уменьшили высоту, чтобы не конфликтовать с крестиком */
+        border-radius: 12px;
     }
 
     .close-modal {
-        top: 12px;
-        right: 12px;
-        background: rgba(0, 0, 0, 0.6);
+        top: 16px;
+        right: 16px;
+        padding: 6px;
+        /* Чуть компактнее на телефоне */
+        background: rgba(10, 14, 23, 0.8);
     }
 
     .modal-actions {
@@ -147,11 +160,13 @@
         margin-top: 0;
         padding: 12px;
         border-radius: 16px;
-        background: rgba(10, 14, 23, 0.9);
+        background: rgba(10, 14, 23, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
     }
 
     .action-btn {
-        padding: 8px;
+        padding: 10px;
         flex: 1;
         justify-content: center;
     }
