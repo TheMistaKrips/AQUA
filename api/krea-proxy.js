@@ -22,34 +22,35 @@ export default async function handler(req, res) {
             const { prompt, image_url } = req.body;
             let finalImageUrl = null;
 
-            // Если прилетел Base64, загружаем его на независимый хостинг (Catbox)
+            // Если прилетел Base64, грузим его на лояльный хостинг tmpfiles.org
             if (image_url && image_url.startsWith('data:')) {
-                console.log("📸 Обнаружен Base64. Загружаем на временный хостинг Catbox...");
+                console.log("📸 Обнаружен Base64. Загружаем на tmpfiles.org...");
 
                 try {
                     const mimeType = image_url.substring(image_url.indexOf(':') + 1, image_url.indexOf(';'));
                     const base64Data = image_url.split(',')[1];
                     const buffer = Buffer.from(base64Data, 'base64');
 
-                    // Собираем FormData для Catbox API
+                    // Формируем файл
                     const formData = new FormData();
-                    formData.append('reqtype', 'fileupload');
-
                     const fileBlob = new Blob([buffer], { type: mimeType });
-                    formData.append('fileToUpload', fileBlob, `ref_image.${mimeType.split('/')[1]}`);
+                    formData.append('file', fileBlob, `image.${mimeType.split('/')[1]}`);
 
-                    const uploadResponse = await fetch('https://catbox.moe/user/api.php', {
+                    const uploadResponse = await fetch('https://tmpfiles.org/api/v1/upload', {
                         method: 'POST',
                         body: formData
                     });
 
                     if (!uploadResponse.ok) {
-                        throw new Error(`Catbox отклонил файл. Статус: ${uploadResponse.status}`);
+                        throw new Error(`Tmpfiles отклонил файл. Статус: ${uploadResponse.status}`);
                     }
 
-                    // Catbox возвращает просто текст со ссылкой (например: https://files.catbox.moe/xyz.jpg)
-                    finalImageUrl = await uploadResponse.text();
-                    console.log("✅ Картинка загружена! Прямая ссылка:", finalImageUrl);
+                    const uploadData = await uploadResponse.json();
+
+                    // Tmpfiles возвращает ссылку вида https://tmpfiles.org/12345/image.png
+                    // Чтобы нейросеть могла скачать файл напрямую, нужно добавить /dl/
+                    finalImageUrl = uploadData.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+                    console.log("✅ Картинка загружена! Прямая ссылка для нейросети:", finalImageUrl);
 
                 } catch (uploadError) {
                     return res.status(400).json({
@@ -67,12 +68,11 @@ export default async function handler(req, res) {
                 aspect_ratio: "9:16"
             };
 
-            // Передаем Krea публичную ссылку
             if (finalImageUrl) {
                 payload.image_url = finalImageUrl;
             }
 
-            console.log("🚀 Отправляем запрос в Krea Kling 3.0...");
+            console.log("🚀 Отправляем прямую ссылку в Krea Kling 3.0...");
             const kreaResponse = await fetch('https://api.krea.ai/generate/video/kling/kling-3.0', {
                 method: 'POST',
                 headers: {
