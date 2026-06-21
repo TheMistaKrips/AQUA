@@ -1,6 +1,10 @@
-export default async function handler(req, res) {
-    // Настройки CORS
-    res.setHeader('Access-Control-Allow-Credentials', true);
+import https from 'https';
+
+export const maxDuration = 60; // Даем функции жить до 60 секунд
+
+export default function handler(req, res) {
+    // 1. Настройки CORS
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
@@ -9,49 +13,47 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Только POST' });
 
     const HF_TOKEN = process.env.VITE_HF_API_KEY;
-    if (!HF_TOKEN) return res.status(500).json({ error: 'Ключ VITE_HF_API_KEY не найден на Vercel!' });
+    if (!HF_TOKEN) return res.status(500).json({ error: 'Ключ VITE_HF_API_KEY не найден!' });
 
     const { model, payload } = req.body;
 
-    try {
-        const hfResponse = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${HF_TOKEN}`,
-                'Content-Type': 'application/json',
-                // Заставляем HF не сбрасывать соединение, а честно ждать конца генерации
-                'x-wait-for-model': 'true'
-            },
-            body: JSON.stringify(payload)
+    // 2. Параметры низкоуровневого запроса
+    const options = {
+        hostname: 'api-inference.huggingface.co',
+        path: `/models/${model}`,
+        method: 'POST',
+        family: 4, // ⚠️ ГЛАВНАЯ МАГИЯ: Принудительно используем IPv4! Обходит баг Vercel
+        headers: {
+            'Authorization': `Bearer ${HF_TOKEN}`,
+            'Content-Type': 'application/json',
+            'x-wait-for-model': 'true' // Просим HF дождаться рендера видео
+        }
+    };
+
+    // 3. Открываем системный HTTPS запрос
+    const request = https.request(options, (hfRes) => {
+
+        // Передаем статус от нейросети прямо в React
+        res.status(hfRes.statusCode);
+
+        // Прокидываем заголовки (это скажет браузеру, что летит именно video/mp4)
+        for (const key in hfRes.headers) {
+            res.setHeader(key, hfRes.headers[key]);
+        }
+
+        // 🚀 Стримим результат напрямую! Vercel больше не разорвет пакет из-за перевеса.
+        hfRes.pipe(res);
+    });
+
+    // 4. Отлов реальных системных ошибок сети
+    request.on('error', (e) => {
+        res.status(500).json({
+            error: 'Низкоуровневый сбой сети Vercel',
+            details: e.message // Теперь тут будет написана настоящая причина (ECONNRESET, ETIMEDOUT и т.д.)
         });
+    });
 
-        if (hfResponse.status === 503) {
-            return res.status(503).json({ error: 'Модель загружается', status: 503 });
-        }
-
-        if (!hfResponse.ok) {
-            const errText = await hfResponse.text();
-            return res.status(hfResponse.status).json({ error: errText });
-        }
-
-        const contentType = hfResponse.headers.get('content-type');
-
-        // Если HF прислал JSON с ошибкой вместо видео (такое бывает)
-        if (contentType && contentType.includes('application/json')) {
-            const jsonResponse = await hfResponse.json();
-            return res.status(400).json({ error: 'HF вернул текст/ошибку вместо видео', details: jsonResponse });
-        }
-
-        // Забираем бинарник видео
-        const arrayBuffer = await hfResponse.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-
-        // Прокидываем видео прямо в React
-        res.setHeader('Content-Type', contentType || 'video/mp4');
-        return res.status(200).send(buffer);
-
-    } catch (error) {
-        // Теперь, если соединение отвалится, мы увидим реальную причину
-        return res.status(500).json({ error: 'Сбой сети между Vercel и HF', details: error.message });
-    }
+    // Отправляем наш текст в нейросеть
+    request.write(JSON.stringify(payload));
+    request.end();
 }
