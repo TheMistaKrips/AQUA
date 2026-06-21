@@ -17,21 +17,66 @@ export default async function handler(req, res) {
     }
 
     try {
-        // === 1. СОЗДАНИЕ ЗАДАЧИ НА ВИДЕО ПО ФОТО И ТЕКСТУ (POST) ===
+        // === 1. СОЗДАНИЕ ЗАДАЧИ НА ВИДЕО (POST) ===
         if (req.method === 'POST') {
             const { prompt, image_url } = req.body;
+            let finalImageUrl = null;
 
-            // Формируем payload для Krea Kling 3.0
+            // Если прилетел Base64, загружаем его на сервера Krea
+            if (image_url && image_url.startsWith('data:')) {
+                console.log("Конвертируем Base64 и загружаем на Krea...");
+
+                try {
+                    // Вытаскиваем чистый base64 и mimeType
+                    const mimeType = image_url.substring(image_url.indexOf(':') + 1, image_url.indexOf(';'));
+                    const base64Data = image_url.split(',')[1];
+                    const buffer = Buffer.from(base64Data, 'base64');
+
+                    // Собираем FormData для отправки файла на Krea
+                    const formData = new FormData();
+                    const fileBlob = new Blob([buffer], { type: mimeType });
+                    formData.append('file', fileBlob, `input_frame.${mimeType.split('/')[1]}`);
+
+                    const uploadResponse = await fetch('https://api.krea.ai/v1/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${KREA_API_KEY}`
+                        },
+                        body: formData
+                    });
+
+                    if (!uploadResponse.ok) {
+                        const uploadErr = await uploadResponse.text();
+                        throw new Error(`Не удалось загрузить картинку на сервер Krea: ${uploadErr}`);
+                    }
+
+                    const uploadData = await uploadResponse.json();
+                    // Перехватываем публичный URL, который выдала Krea
+                    finalImageUrl = uploadData.url || uploadData.uri;
+                    console.log("Картинка успешно залита на Krea, ссылка:", finalImageUrl);
+
+                } catch (uploadError) {
+                    return res.status(400).json({
+                        error: 'Ошибка предварительной загрузки изображения',
+                        details: uploadError.message
+                    });
+                }
+            } else if (image_url) {
+                // Если прилетела обычная ссылка, оставляем как есть
+                finalImageUrl = image_url;
+            }
+
+            // Формируем финальный payload для Kling 3.0
             const payload = {
                 prompt: prompt || "Animate this image, cinematic, high quality",
                 aspect_ratio: "9:16"
             };
 
-            // Если пользователь прикрепил картинку, добавляем её в запрос
-            if (image_url) {
-                payload.image_url = image_url;
+            if (finalImageUrl) {
+                payload.image_url = finalImageUrl;
             }
 
+            console.log("Отправляем итоговый запрос в Kling 3.0...");
             const kreaResponse = await fetch('https://api.krea.ai/generate/video/kling/kling-3.0', {
                 method: 'POST',
                 headers: {
@@ -48,7 +93,7 @@ export default async function handler(req, res) {
                 return res.status(kreaResponse.status).json({ error: 'Krea отклонила старт задачи', details: data });
             }
 
-            return res.status(200).json(data); // Возвращает { job_id: "..." }
+            return res.status(200).json(data);
         }
 
         // === 2. ПРОВЕРКА СТАТУСА (GET) ===
