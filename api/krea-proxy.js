@@ -8,57 +8,72 @@ export default async function handler(req, res) {
         'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
     );
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
-
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Допускаются только POST-запросы' });
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
     const KREA_API_KEY = process.env.VITE_KREA_API_KEY;
 
     if (!KREA_API_KEY) {
-        return res.status(500).json({ error: 'Ключ VITE_KREA_API_KEY не найден в Environment Variables на Vercel!' });
+        return res.status(500).json({ error: 'Ключ VITE_KREA_API_KEY не настроен в панели Vercel!' });
     }
 
     try {
-        const kreaResponse = await fetch('https://api.krea.ai/v1/video-generation', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${KREA_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(req.body),
-        });
+        // === 1. СОЗДАНИЕ ЗАДАЧИ НА ВИДЕО ПО ФОТО И ТЕКСТУ (POST) ===
+        if (req.method === 'POST') {
+            const { prompt, image_url } = req.body;
 
-        // Проверяем тип контента от Krea
-        const contentType = kreaResponse.headers.get('content-type') || '';
-        let responseData;
+            // Формируем payload для Krea Kling 3.0
+            const payload = {
+                prompt: prompt || "Animate this image, cinematic, high quality",
+                aspect_ratio: "9:16"
+            };
 
-        if (contentType.includes('application/json')) {
-            responseData = await kreaResponse.json();
-        } else {
-            // Если Krea вернула HTML-ошибку или текст, забираем как строку
-            responseData = { rawText: await kreaResponse.text() };
-        }
+            // Если пользователь прикрепил картинку, добавляем её в запрос
+            if (image_url) {
+                payload.image_url = image_url;
+            }
 
-        // Если Krea вернула статус ошибки (например, 400 или 413)
-        if (!kreaResponse.ok) {
-            return res.status(kreaResponse.status).json({
-                error: 'Ошибка от Krea API',
-                status: kreaResponse.status,
-                details: responseData
+            const kreaResponse = await fetch('https://api.krea.ai/generate/video/kling/kling-3.0', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${KREA_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
             });
+
+            const contentType = kreaResponse.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await kreaResponse.json() : await kreaResponse.text();
+
+            if (!kreaResponse.ok) {
+                return res.status(kreaResponse.status).json({ error: 'Krea отклонила старт задачи', details: data });
+            }
+
+            return res.status(200).json(data); // Возвращает { job_id: "..." }
         }
 
-        // Если всё супер
-        return res.status(200).json(responseData);
+        // === 2. ПРОВЕРКА СТАТУСА (GET) ===
+        if (req.method === 'GET') {
+            const { job_id } = req.query;
+            if (!job_id) return res.status(400).json({ error: 'Пропущен job_id' });
+
+            const kreaResponse = await fetch(`https://api.krea.ai/jobs/${job_id}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${KREA_API_KEY}` }
+            });
+
+            const contentType = kreaResponse.headers.get('content-type') || '';
+            const data = contentType.includes('application/json') ? await kreaResponse.json() : await kreaResponse.text();
+
+            if (!kreaResponse.ok) {
+                return res.status(kreaResponse.status).json({ error: 'Ошибка проверки статуса', details: data });
+            }
+
+            return res.status(200).json(data);
+        }
+
+        return res.status(405).json({ error: 'Метод не поддерживается' });
 
     } catch (error) {
-        return res.status(500).json({
-            error: 'Критический сбой прокси-сервера Vercel',
-            details: error.message
-        });
+        return res.status(500).json({ error: 'Внутренний сбой прокси сервера', details: error.message });
     }
 }
