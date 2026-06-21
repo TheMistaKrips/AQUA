@@ -79,15 +79,21 @@
     flex-shrink: 0;
 }
 
-.send-btn:hover {
-    background: var(--text-primary);
+.send-btn:hover:not(:disabled) {
+    background: var(--accent-aqua);
     color: var(--bg-dark);
 }
 
-/* ВОССТАНОВЛЕНИЕ ПАНЕЛИ НАСТРОЕК */
+.send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ИСПРАВЛЕННАЯ ПАНЕЛЬ НАСТРОЕК */
 .settings-panel {
     position: absolute;
-    bottom: 80px;
+    bottom: calc(100% + 15px);
+    /* Всегда ровно над инпутом */
     right: 0;
     padding: 20px;
     border-radius: 16px;
@@ -96,17 +102,21 @@
     gap: 20px;
     background: rgba(18, 22, 30, 0.95);
     border: 1px solid var(--glass-border);
-    z-index: 100;
+    z-index: 1000;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    width: 320px;
+    /* Жесткая ширина, чтобы не плющило текст */
 }
 
 .setting-group label {
     display: block;
     font-size: 11px;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .buttons-row {
@@ -116,22 +126,26 @@
 }
 
 .buttons-row button {
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--glass-border);
+    padding: 8px 14px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     color: var(--text-secondary);
     border-radius: 8px;
     font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s;
 }
 
 .buttons-row button:hover {
     background: rgba(255, 255, 255, 0.1);
+    color: white;
 }
 
 .buttons-row button.active {
     color: white;
-    background: rgba(56, 189, 248, 0.2);
+    background: rgba(56, 189, 248, 0.15);
     border-color: var(--accent-aqua);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
 .references-preview {

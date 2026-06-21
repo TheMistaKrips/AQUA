@@ -16,16 +16,15 @@ export default function App() {
   const [activeProjectId, setActiveProjectId] = useState(null);
   const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [isLoaded, setIsLoaded] = useState(false);
-
   const [selectedImage, setSelectedImage] = useState(null);
   const [restorePromptData, setRestorePromptData] = useState(null);
 
+  // ПРОВЕРКА КЛЮЧА
   useEffect(() => {
     const savedKey = localStorage.getItem('aqua_access_key');
+    // Пускаем, только если ключ есть в кэше и он все еще существует в keys.json
     if (savedKey && keysData.validKeys.includes(savedKey)) {
       setIsAuthenticated(true);
-    } else {
-      localStorage.removeItem('aqua_access_key'); // Чистим мертвые ключи
     }
     setAuthChecked(true);
   }, []);
@@ -54,9 +53,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (isLoaded) {
-      localforage.setItem('aqua_projects', projects);
-    }
+    if (isLoaded) localforage.setItem('aqua_projects', projects);
   }, [projects, isLoaded]);
 
   const activeProject = projects.find(p => p.id === activeProjectId);
