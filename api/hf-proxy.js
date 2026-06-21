@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+    // Настройки CORS
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -18,6 +19,8 @@ export default async function handler(req, res) {
             headers: {
                 'Authorization': `Bearer ${HF_TOKEN}`,
                 'Content-Type': 'application/json',
+                // Заставляем HF не сбрасывать соединение, а честно ждать конца генерации
+                'x-wait-for-model': 'true'
             },
             body: JSON.stringify(payload)
         });
@@ -33,20 +36,22 @@ export default async function handler(req, res) {
 
         const contentType = hfResponse.headers.get('content-type');
 
-        // Если HF почему-то вернул JSON (например, ошибку внутри 200 статуса)
+        // Если HF прислал JSON с ошибкой вместо видео (такое бывает)
         if (contentType && contentType.includes('application/json')) {
             const jsonResponse = await hfResponse.json();
-            return res.status(400).json({ error: 'HF вернул JSON вместо видео', details: jsonResponse });
+            return res.status(400).json({ error: 'HF вернул текст/ошибку вместо видео', details: jsonResponse });
         }
 
-        // Забираем бинарный файл видео и прокидываем на фронтенд
+        // Забираем бинарник видео
         const arrayBuffer = await hfResponse.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
+        // Прокидываем видео прямо в React
         res.setHeader('Content-Type', contentType || 'video/mp4');
         return res.status(200).send(buffer);
 
     } catch (error) {
-        return res.status(500).json({ error: 'Сбой прокси Vercel', details: error.message });
+        // Теперь, если соединение отвалится, мы увидим реальную причину
+        return res.status(500).json({ error: 'Сбой сети между Vercel и HF', details: error.message });
     }
 }
