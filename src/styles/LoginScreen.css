@@ -1,0 +1,128 @@
+.login-container {
+    width: 100vw;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-dark);
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99999;
+}
+
+.login-panel {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: rgba(18, 22, 30, 0.7);
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--glass-border);
+}
+
+.login-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 24px;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+    object-fit: cover;
+    border: 2px solid rgba(56, 189, 248, 0.4);
+}
+
+.login-panel h2 {
+    margin-bottom: 8px;
+    color: white;
+    font-size: 24px;
+}
+
+.login-panel p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 32px;
+    line-height: 1.5;
+}
+
+.login-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.login-form input:focus {
+    border-color: var(--accent-aqua);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    background: var(--accent-aqua);
+    color: var(--bg-dark);
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+}
+
+.error-text {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: -8px;
+    font-weight: 500;
+}
+
+.error-shake {
+    border-color: var(--danger) !important;
+    animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}

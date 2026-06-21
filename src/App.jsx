@@ -4,16 +4,40 @@ import Sidebar from './components/Sidebar';
 import ProjectView from './components/ProjectView';
 import AgentView from './components/AgentView';
 import ImageModal from './components/ImageModal';
+import LoginScreen from './components/LoginScreen'; // ИМПОРТ НОВОГО ЭКРАНА
+import keysData from './data/keys.json'; // ИМПОРТ НАШИХ КЛЮЧЕЙ
 import './styles/App.css';
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
   const [projects, setProjects] = useState([]);
   const [activeProjectId, setActiveProjectId] = useState(null);
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [restorePromptData, setRestorePromptData] = useState(null);
+
+  // ПРОВЕРКА КЛЮЧА ПРИ ЗАГРУЗКЕ
+  useEffect(() => {
+    const savedKey = localStorage.getItem('aqua_access_key');
+    // Если ключ есть в кэше И он совпадает с одним из ключей в JSON
+    if (savedKey && keysData.validKeys.includes(savedKey)) {
+      setIsAuthenticated(true);
+    }
+    setAuthChecked(true);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) setSidebarOpen(false);
+      else setSidebarOpen(true);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     localforage.getItem('aqua_projects').then(savedProjects => {
@@ -37,6 +61,13 @@ export default function App() {
 
   const activeProject = projects.find(p => p.id === activeProjectId);
 
+  const handleProjectSelect = (id) => {
+    setActiveProjectId(id);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   const createProject = (type = 'standard') => {
     const newProject = {
       id: Date.now(),
@@ -47,7 +78,7 @@ export default function App() {
       chatHistory: []
     };
     setProjects(prev => [...prev, newProject]);
-    setActiveProjectId(newProject.id);
+    handleProjectSelect(newProject.id);
   };
 
   const renameProject = (id, newName) => {
@@ -120,6 +151,15 @@ export default function App() {
     setSelectedImage(null);
   };
 
+  // Пока не проверили кэш - ничего не рисуем (чтобы не моргало)
+  if (!authChecked) return null;
+
+  // Если проверки нет, показываем жестко Экран Входа
+  if (!isAuthenticated) {
+    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+  }
+
+  // Если авторизован, но проекты еще грузятся
   if (!isLoaded) return null;
 
   return (
@@ -127,7 +167,7 @@ export default function App() {
       <Sidebar
         projects={projects}
         activeProjectId={activeProjectId}
-        setActiveProjectId={setActiveProjectId}
+        setActiveProjectId={handleProjectSelect}
         createProject={createProject}
         renameProject={renameProject}
         deleteProject={deleteProject}
