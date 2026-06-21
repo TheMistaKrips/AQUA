@@ -10,7 +10,6 @@ export default function ChatInput({
     clearRestoreData
 }) {
     const [prompt, setPrompt] = useState('');
-    const [isGenerating, setIsGenerating] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [settings, setSettings] = useState({ aspectRatio: '16:9', count: 1 });
     const [referenceImages, setReferenceImages] = useState([]);
@@ -55,56 +54,55 @@ export default function ChatInput({
         setReferenceImages(prev => prev.filter((_, i) => i !== index));
     };
 
-    // ИСПРАВЛЕНА ЛОГИКА ОТПРАВКИ
-    const handleSubmit = async (e) => {
+    // ПОЛНОСТЬЮ АСИНХРОННАЯ ОТПРАВКА БЕЗ БЛОКИРОВКИ ИНТЕРФЕЙСА
+    const handleSubmit = (e) => {
         if (e) e.preventDefault();
         if (!prompt.trim() && referenceImages.length === 0) return;
-        if (isGenerating) return;
 
-        setIsGenerating(true);
-        setIsSettingsOpen(false);
-
+        // Сохраняем текущие данные в локальные константы для фоновой задачи
         const currentPrompt = prompt;
         const currentRefs = [...referenceImages];
         const currentSettings = { ...settings };
 
+        // МГНОВЕННО очищаем инпут, чтобы ты мог писать следующий промпт
         setPrompt('');
         setReferenceImages([]);
+        setIsSettingsOpen(false);
 
-        // 1. Создаем плейсхолдеры
+        // 1. Создаем плейсхолдеры и закидываем их в сетку
         const placeholders = Array.from({ length: currentSettings.count }).map((_, i) => ({
-            id: Date.now() + i,
+            id: Date.now() + Math.random() + i, // Рандом защитит от совпадения ID при быстром спаме кнопкой
             type: 'generating',
             name: `Генерация: ${currentPrompt.substring(0, 20)}...`
         }));
 
         if (onImagesAdded) onImagesAdded(placeholders);
 
-        // 2. Отправляем в API
-        try {
-            const generatedUrls = await generateImages(currentPrompt, {
-                aspectRatio: currentSettings.aspectRatio,
-                count: currentSettings.count,
-                referenceImages: currentRefs
+        // 2. Отправляем запрос в фоне (без await), UI не блокируется!
+        generateImages(currentPrompt, {
+            aspectRatio: currentSettings.aspectRatio,
+            count: currentSettings.count,
+            referenceImages: currentRefs
+        })
+            .then(generatedUrls => {
+                // Когда API отдаст картинки, заменяем плейсхолдеры
+                const newImages = generatedUrls.map((url, i) => ({
+                    id: Date.now() + Math.random() + i,
+                    name: currentPrompt ? currentPrompt.substring(0, 30) + '...' : 'Генерация по рефу',
+                    url: url,
+                    type: 'generated',
+                    promptInfo: { text: currentPrompt, refs: currentRefs }
+                }));
+
+                const placeholderIds = placeholders.map(p => p.id);
+                if (onPlaceholdersResolved) onPlaceholdersResolved(placeholderIds, newImages);
+            })
+            .catch(error => {
+                console.error("Фоновая ошибка генерации:", error);
+                // Если ошибка (например, лимиты API), удаляем крутилки
+                const placeholderIds = placeholders.map(p => p.id);
+                if (onPlaceholdersResolved) onPlaceholdersResolved(placeholderIds, []);
             });
-
-            const newImages = generatedUrls.map((url, i) => ({
-                id: Date.now() + Math.random() + i,
-                name: currentPrompt ? currentPrompt.substring(0, 30) + '...' : 'Генерация по рефу',
-                url: url,
-                type: 'generated',
-                promptInfo: { text: currentPrompt, refs: currentRefs }
-            }));
-
-            const placeholderIds = placeholders.map(p => p.id);
-            if (onPlaceholdersResolved) onPlaceholdersResolved(placeholderIds, newImages);
-        } catch (error) {
-            console.error(error);
-            const placeholderIds = placeholders.map(p => p.id);
-            if (onPlaceholdersResolved) onPlaceholdersResolved(placeholderIds, []);
-        }
-
-        setIsGenerating(false);
     };
 
     const handleKeyDown = (e) => {
@@ -146,7 +144,8 @@ export default function ChatInput({
                     <div className="setting-group">
                         <label>Количество кадров</label>
                         <div className="buttons-row">
-                            {[1, 2, 3, 4].map(num => (
+                            {/* РАСШИРИЛИ ЛИМИТЫ БАТЧА ДО 10 */}
+                            {[1, 2, 3, 4, 6, 8, 10].map(num => (
                                 <button
                                     key={num}
                                     className={settings.count === num ? 'active' : ''}
@@ -196,10 +195,11 @@ export default function ChatInput({
                         <Settings2 size={20} />
                     </button>
 
+                    {/* КНОПКА БОЛЬШЕ НЕ БЛОКИРУЕТСЯ ВО ВРЕМЯ ГЕНЕРАЦИИ */}
                     <button
                         className="send-btn"
                         onClick={handleSubmit}
-                        disabled={isGenerating || (!prompt.trim() && referenceImages.length === 0)}
+                        disabled={!prompt.trim() && referenceImages.length === 0}
                     >
                         <Send size={18} />
                     </button>
