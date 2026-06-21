@@ -3,7 +3,6 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VI
 export async function generateVideo(prompt, config) {
     const { count = 1, referenceImages = [] } = config;
 
-    // Переключаемся на Veo 3.1 Fast, если есть картинка
     const isImageToVideo = referenceImages.length > 0;
     const model = isImageToVideo
         ? "veo-3.1-fast-generate-preview"
@@ -20,7 +19,7 @@ export async function generateVideo(prompt, config) {
         base64Image = imgData.split(',')[1];
         console.log("📸 Обнаружен референс, режим: Image-to-Video");
     } else {
-        console.log("📝 Референса нет, режим: Text-to-Video!");
+        console.log("📝 Референса нет, режим: Text-to-Video");
     }
 
     const tasks = Array.from({ length: count }).map(async (_, index) => {
@@ -29,12 +28,10 @@ export async function generateVideo(prompt, config) {
 
             const createUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predictLongRunning?key=${GEMINI_API_KEY}`;
 
-            // СТРОГО по документации Google Vertex/Gemini для Veo
             const instance = {
                 prompt: prompt || "Cinematic video, masterpiece, high quality"
             };
 
-            // ⚠️ ВАЖНО: Ключ ДОЛЖЕН называться "image", а не "firstFrame" !
             if (base64Image) {
                 instance.image = {
                     mimeType: mimeType,
@@ -49,7 +46,6 @@ export async function generateVideo(prompt, config) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     instances: [instance],
-                    // Google требует явного указания параметров для видео
                     parameters: {
                         aspectRatio: "16:9",
                         resolution: "720p",
@@ -73,12 +69,12 @@ export async function generateVideo(prompt, config) {
                 return null;
             }
 
-            console.log(`[Видео ${index + 1}] ⏳ Задача принята! ID: ${operationName}. Ожидаем рендера (обычно 30-90 сек)...`);
+            console.log(`[Видео ${index + 1}] ⏳ Задача принята! ID: ${operationName}. Ожидаем рендера...`);
 
             const pollUrl = `https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${GEMINI_API_KEY}`;
 
             for (let attempt = 1; attempt <= 40; attempt++) {
-                await new Promise(res => setTimeout(res, 10000)); // Проверяем статус каждые 10 секунд
+                await new Promise(res => setTimeout(res, 10000));
 
                 const pollRes = await fetch(pollUrl);
                 if (!pollRes.ok) continue;
@@ -92,34 +88,52 @@ export async function generateVideo(prompt, config) {
                         return null;
                     }
 
-                    console.log(`[Видео ${index + 1}] 🎉 ГОТОВО! Ответ от Google получен:`, pollData);
+                    console.log(`[Видео ${index + 1}] 🎉 ГОТОВО! Видео отрендерено, распаковываем...`);
 
-                    let responseVideo = pollData.response?.videoUri
-                        || pollData.response?.predictions?.[0]?.videoUri
-                        || pollData.response?.generatedVideoUri
-                        || pollData.response?.predictions?.[0]?.bytesBase64Encoded;
+                    // 🕵️‍♂️ УМНАЯ ИЩЕЙКА ВИДЕО
+                    // Сканируем весь JSON ответа и ищем огромный файл или прямую ссылку
+                    let responseVideo = null;
+                    const findVideoInJSON = (obj) => {
+                        if (!obj || typeof obj !== 'object') return;
+                        for (let key in obj) {
+                            const val = obj[key];
+                            if (typeof val === 'string') {
+                                // Если строка гигантская (> 50 тысяч символов), это 100% наше видео в Base64
+                                if (val.length > 50000) {
+                                    responseVideo = val;
+                                    return;
+                                }
+                                // Если это публичная ссылка на видео
+                                if (val.startsWith('http') && (val.includes('.mp4') || val.includes('video'))) {
+                                    responseVideo = val;
+                                    return;
+                                }
+                            } else if (typeof val === 'object') {
+                                findVideoInJSON(val); // Копаем глубже
+                            }
+                        }
+                    };
+
+                    findVideoInJSON(pollData.response);
 
                     if (responseVideo) {
                         if (responseVideo.startsWith('http')) {
-                            // Обязательно добавляем API-ключ к ссылке на скачивание, иначе будет 403 Forbidden
+                            // Если это прямая ссылка
                             if (!responseVideo.includes('key=')) {
                                 responseVideo += (responseVideo.includes('?') ? '&' : '?') + `key=${GEMINI_API_KEY}`;
                             }
                             return responseVideo;
                         }
                         else {
-                            const byteCharacters = atob(responseVideo);
-                            const byteNumbers = new Array(byteCharacters.length);
-                            for (let i = 0; i < byteCharacters.length; i++) {
-                                byteNumbers[i] = byteCharacters.charCodeAt(i);
-                            }
-                            const byteArray = new Uint8Array(byteNumbers);
-                            const blob = new Blob([byteArray], { type: 'video/mp4' });
+                            // Молниеносная конвертация Base64 в Blob без зависания браузера
+                            console.log(`[Видео ${index + 1}] Конвертируем Base64 в .mp4 файл...`);
+                            const res = await fetch(`data:video/mp4;base64,${responseVideo}`);
+                            const blob = await res.blob();
                             return URL.createObjectURL(blob);
                         }
                     }
 
-                    console.error(`[Видео ${index + 1}] ❌ Не удалось найти видео в ответе.`, pollData);
+                    console.error(`[Видео ${index + 1}] ❌ Не удалось найти ни ссылку, ни Base64 в ответе!`);
                     return null;
                 }
             }
