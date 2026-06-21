@@ -11,13 +11,11 @@ export default function LoginScreen({ onLogin }) {
         e.preventDefault();
         const cleanKey = inputKey.trim();
 
-        // Проверяем, есть ли введенный ключ в нашем JSON-файле
         if (keysData.validKeys.includes(cleanKey)) {
-            // Если есть — сохраняем в кэш браузера навсегда и пускаем в приложение
-            localStorage.setItem('aqua_access_key', cleanKey);
+            // Ключ верный. Выдаем вечный пропуск на это устройство.
+            localStorage.setItem('aqua_session_active', 'true');
             onLogin();
         } else {
-            // Если нет — трясем инпут и выдаем ошибку
             setError(true);
             setInputKey('');
         }

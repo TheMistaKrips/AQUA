@@ -13,14 +13,21 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    touch-action: manipulation;
 }
 
+html,
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--bg-dark);
     color: var(--text-primary);
+    width: 100vw;
+    height: 100dvh;
     overflow: hidden;
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overscroll-behavior-y: none;
 }
 
 body::before,
@@ -68,6 +75,7 @@ button {
     background: none;
     font-family: inherit;
     transition: all 0.2s ease;
+    outline: none;
 }
 
 ::-webkit-scrollbar {
@@ -83,16 +91,13 @@ button {
     border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
 .app-container {
     display: flex;
-    height: 100vh;
+    height: 100%;
     width: 100vw;
     padding: 16px;
     gap: 16px;
+    position: relative;
 }
 
 .main-content {
@@ -110,15 +115,23 @@ button {
     overflow: hidden;
 }
 
-.main-content.expanded {
-    margin-left: 0;
-}
-
 .empty-state {
     margin: auto;
     padding: 24px 48px;
     border-radius: 16px;
     color: var(--text-secondary);
     font-size: 1.1rem;
-    letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        padding: 8px;
+        gap: 0;
+        height: 100dvh;
+    }
+
+    .main-content {
+        border-radius: 16px;
+        height: 100%;
+    }
 }

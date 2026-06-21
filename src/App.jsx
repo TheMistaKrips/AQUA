@@ -4,8 +4,8 @@ import Sidebar from './components/Sidebar';
 import ProjectView from './components/ProjectView';
 import AgentView from './components/AgentView';
 import ImageModal from './components/ImageModal';
-import LoginScreen from './components/LoginScreen'; // ИМПОРТ НОВОГО ЭКРАНА
-import keysData from './data/keys.json'; // ИМПОРТ НАШИХ КЛЮЧЕЙ
+import LoginScreen from './components/LoginScreen';
+import keysData from './data/keys.json';
 import './styles/App.css';
 
 export default function App() {
@@ -20,12 +20,12 @@ export default function App() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [restorePromptData, setRestorePromptData] = useState(null);
 
-  // ПРОВЕРКА КЛЮЧА ПРИ ЗАГРУЗКЕ
   useEffect(() => {
     const savedKey = localStorage.getItem('aqua_access_key');
-    // Если ключ есть в кэше И он совпадает с одним из ключей в JSON
     if (savedKey && keysData.validKeys.includes(savedKey)) {
       setIsAuthenticated(true);
+    } else {
+      localStorage.removeItem('aqua_access_key'); // Чистим мертвые ключи
     }
     setAuthChecked(true);
   }, []);
@@ -63,19 +63,13 @@ export default function App() {
 
   const handleProjectSelect = (id) => {
     setActiveProjectId(id);
-    if (window.innerWidth <= 768) {
-      setSidebarOpen(false);
-    }
+    if (window.innerWidth <= 768) setSidebarOpen(false);
   };
 
   const createProject = (type = 'standard') => {
     const newProject = {
-      id: Date.now(),
-      name: type === 'agent' ? `Агент ${projects.length + 1}` : `Проект ${projects.length + 1}`,
-      type: type,
-      images: [],
-      baseRefs: [],
-      chatHistory: []
+      id: Date.now(), name: type === 'agent' ? `Агент ${projects.length + 1}` : `Проект ${projects.length + 1}`,
+      type: type, images: [], baseRefs: [], chatHistory: []
     };
     setProjects(prev => [...prev, newProject]);
     handleProjectSelect(newProject.id);
@@ -88,9 +82,7 @@ export default function App() {
   const deleteProject = (id) => {
     setProjects(prev => {
       const filtered = prev.filter(p => p.id !== id);
-      if (activeProjectId === id && filtered.length > 0) {
-        setActiveProjectId(filtered[0].id);
-      }
+      if (activeProjectId === id && filtered.length > 0) setActiveProjectId(filtered[0].id);
       return filtered;
     });
   };
@@ -112,10 +104,7 @@ export default function App() {
   const updateImageName = (projectId, imageId, newName) => {
     setProjects(prevProjects => prevProjects.map(p => {
       if (p.id !== projectId) return p;
-      return {
-        ...p,
-        images: p.images.map(img => img.id === imageId ? { ...img, name: newName } : img)
-      };
+      return { ...p, images: p.images.map(img => img.id === imageId ? { ...img, name: newName } : img) };
     }));
   };
 
@@ -136,11 +125,7 @@ export default function App() {
   const addBaseRef = (projectId, imageUrl, suggestedName) => {
     setProjects(prevProjects => prevProjects.map(p => {
       if (p.id !== projectId || p.type !== 'agent') return p;
-      const newRef = {
-        id: Date.now() + Math.random(),
-        name: suggestedName || `Новый реф ${p.baseRefs.length + 1}`,
-        url: imageUrl
-      };
+      const newRef = { id: Date.now() + Math.random(), name: suggestedName || `Новый реф ${p.baseRefs.length + 1}`, url: imageUrl };
       return { ...p, baseRefs: [...p.baseRefs, newRef] };
     }));
     setSelectedImage(null);
@@ -151,53 +136,34 @@ export default function App() {
     setSelectedImage(null);
   };
 
-  // Пока не проверили кэш - ничего не рисуем (чтобы не моргало)
   if (!authChecked) return null;
-
-  // Если проверки нет, показываем жестко Экран Входа
-  if (!isAuthenticated) {
-    return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
-  }
-
-  // Если авторизован, но проекты еще грузятся
+  if (!isAuthenticated) return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
   if (!isLoaded) return null;
 
   return (
     <div className="app-container">
       <Sidebar
-        projects={projects}
-        activeProjectId={activeProjectId}
-        setActiveProjectId={handleProjectSelect}
-        createProject={createProject}
-        renameProject={renameProject}
-        deleteProject={deleteProject}
-        isOpen={isSidebarOpen}
-        toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
+        projects={projects} activeProjectId={activeProjectId} setActiveProjectId={handleProjectSelect}
+        createProject={createProject} renameProject={renameProject} deleteProject={deleteProject}
+        isOpen={isSidebarOpen} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
       />
 
       <div className={`main-content ${isSidebarOpen ? '' : 'expanded'}`}>
         {activeProject ? (
           activeProject.type === 'agent' ? (
             <AgentView
-              project={activeProject}
-              updateProjectData={(data) => updateProjectData(activeProject.id, data)}
-              onImagesAdded={(imgs) => addImagesToProject(activeProject.id, imgs)}
-              onPlaceholdersResolved={(placeholderIds, newImgs) => replacePlaceholders(activeProject.id, placeholderIds, newImgs)}
-              onImageUpdateName={(imgId, name) => updateImageName(activeProject.id, imgId, name)}
-              onImageDelete={(imgId) => deleteImage(activeProject.id, imgId)}
-              onImageClick={setSelectedImage}
+              project={activeProject} updateProjectData={(data) => updateProjectData(activeProject.id, data)}
+              onImagesAdded={(imgs) => addImagesToProject(activeProject.id, imgs)} onPlaceholdersResolved={(placeholderIds, newImgs) => replacePlaceholders(activeProject.id, placeholderIds, newImgs)}
+              onImageUpdateName={(imgId, name) => updateImageName(activeProject.id, imgId, name)} onImageDelete={(imgId) => deleteImage(activeProject.id, imgId)}
+              onImageClick={setSelectedImage} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
             />
           ) : (
             <ProjectView
-              project={activeProject}
-              onImagesAdded={(imgs) => addImagesToProject(activeProject.id, imgs)}
+              project={activeProject} onImagesAdded={(imgs) => addImagesToProject(activeProject.id, imgs)}
               onPlaceholdersResolved={(placeholderIds, newImgs) => replacePlaceholders(activeProject.id, placeholderIds, newImgs)}
-              onImageUpdateName={(imgId, name) => updateImageName(activeProject.id, imgId, name)}
-              onImageDelete={(imgId) => deleteImage(activeProject.id, imgId)}
-              onImageClick={setSelectedImage}
-              restorePromptData={restorePromptData}
-              clearRestoreData={() => setRestorePromptData(null)}
-              onRegenerate={triggerRegenerate}
+              onImageUpdateName={(imgId, name) => updateImageName(activeProject.id, imgId, name)} onImageDelete={(imgId) => deleteImage(activeProject.id, imgId)}
+              onImageClick={setSelectedImage} restorePromptData={restorePromptData} clearRestoreData={() => setRestorePromptData(null)}
+              onRegenerate={triggerRegenerate} toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
             />
           )
         ) : (
@@ -207,11 +173,8 @@ export default function App() {
 
       {selectedImage && (
         <ImageModal
-          image={selectedImage}
-          onClose={() => setSelectedImage(null)}
-          onDelete={() => deleteImage(activeProject.id, selectedImage.id)}
-          onRegenerate={() => triggerRegenerate(selectedImage.promptInfo)}
-          onUseAsReference={() => triggerRegenerate({ text: '', refs: [selectedImage.url] })}
+          image={selectedImage} onClose={() => setSelectedImage(null)} onDelete={() => deleteImage(activeProject.id, selectedImage.id)}
+          onRegenerate={() => triggerRegenerate(selectedImage.promptInfo)} onUseAsReference={() => triggerRegenerate({ text: '', refs: [selectedImage.url] })}
           onAddToBaseRefs={activeProject?.type === 'agent' ? () => addBaseRef(activeProject.id, selectedImage.url, selectedImage.name) : undefined}
         />
       )}
