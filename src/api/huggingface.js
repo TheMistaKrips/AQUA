@@ -3,8 +3,7 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VI
 export async function generateVideo(prompt, config) {
     const { count = 1, referenceImages = [] } = config;
 
-    // ВАЖНО: Veo Lite не поддерживает генерацию по картинке. 
-    // Если есть картинка, переключаемся на Veo 3.1 Fast, иначе оставляем Lite
+    // Переключаемся на Veo 3.1 Fast, если есть картинка
     const isImageToVideo = referenceImages.length > 0;
     const model = isImageToVideo
         ? "veo-3.1-fast-generate-preview"
@@ -19,7 +18,7 @@ export async function generateVideo(prompt, config) {
         const imgData = referenceImages[0];
         mimeType = imgData.substring(imgData.indexOf(':') + 1, imgData.indexOf(';'));
         base64Image = imgData.split(',')[1];
-        console.log("📸 Обнаружен референс, режим: Image-to-Video (Задаем как первый кадр)!");
+        console.log("📸 Обнаружен референс, режим: Image-to-Video");
     } else {
         console.log("📝 Референса нет, режим: Text-to-Video!");
     }
@@ -28,19 +27,18 @@ export async function generateVideo(prompt, config) {
         try {
             if (index > 0) await new Promise(res => setTimeout(res, index * 2000));
 
-            // 1. Создаем задачу через правильный эндпоинт для тяжелых видео-моделей
             const createUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predictLongRunning?key=${GEMINI_API_KEY}`;
 
-            // Структура запроса для Veo отличается от обычного Gemini!
+            // СТРОГО по документации Google Vertex/Gemini для Veo
             const instance = {
                 prompt: prompt || "Cinematic video, masterpiece, high quality"
             };
 
-            // Если есть картинка, Google требует передавать ее как firstFrame (первый кадр видео)
+            // ⚠️ ВАЖНО: Ключ ДОЛЖЕН называться "image", а не "firstFrame" !
             if (base64Image) {
-                instance.firstFrame = {
-                    bytesBase64Encoded: base64Image,
-                    mimeType: mimeType
+                instance.image = {
+                    mimeType: mimeType,
+                    bytesBase64Encoded: base64Image
                 };
             }
 
@@ -51,8 +49,12 @@ export async function generateVideo(prompt, config) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     instances: [instance],
+                    // Google требует явного указания параметров для видео
                     parameters: {
-                        aspectRatio: "16:9" // Можно менять на 9:16
+                        aspectRatio: "16:9",
+                        resolution: "720p",
+                        durationSeconds: 8,
+                        sampleCount: 1
                     }
                 })
             });
@@ -71,13 +73,12 @@ export async function generateVideo(prompt, config) {
                 return null;
             }
 
-            console.log(`[Видео ${index + 1}] ⏳ Задача принята! ID: ${operationName}. Ожидаем рендера (это может занять 1-2 минуты)...`);
+            console.log(`[Видео ${index + 1}] ⏳ Задача принята! ID: ${operationName}. Ожидаем рендера (обычно 30-90 сек)...`);
 
-            // 2. Цикл опроса статуса (Polling)
             const pollUrl = `https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${GEMINI_API_KEY}`;
 
             for (let attempt = 1; attempt <= 40; attempt++) {
-                await new Promise(res => setTimeout(res, 10000)); // Ждем 10 секунд перед каждой проверкой статуса
+                await new Promise(res => setTimeout(res, 10000)); // Проверяем статус каждые 10 секунд
 
                 const pollRes = await fetch(pollUrl);
                 if (!pollRes.ok) continue;
@@ -93,18 +94,19 @@ export async function generateVideo(prompt, config) {
 
                     console.log(`[Видео ${index + 1}] 🎉 ГОТОВО! Ответ от Google получен:`, pollData);
 
-                    // Извлекаем ссылку или base64 файл
-                    const responseVideo = pollData.response?.videoUri
+                    let responseVideo = pollData.response?.videoUri
                         || pollData.response?.predictions?.[0]?.videoUri
                         || pollData.response?.generatedVideoUri
                         || pollData.response?.predictions?.[0]?.bytesBase64Encoded;
 
                     if (responseVideo) {
-                        // Если видео пришло обычной прямой ссылкой (URI)
                         if (responseVideo.startsWith('http')) {
+                            // Обязательно добавляем API-ключ к ссылке на скачивание, иначе будет 403 Forbidden
+                            if (!responseVideo.includes('key=')) {
+                                responseVideo += (responseVideo.includes('?') ? '&' : '?') + `key=${GEMINI_API_KEY}`;
+                            }
                             return responseVideo;
                         }
-                        // Если видео пришло "встроенным" куском кода (Base64)
                         else {
                             const byteCharacters = atob(responseVideo);
                             const byteNumbers = new Array(byteCharacters.length);
@@ -117,7 +119,7 @@ export async function generateVideo(prompt, config) {
                         }
                     }
 
-                    console.error(`[Видео ${index + 1}] ❌ Не удалось найти видео в ответе. Посмотри структуру в консоли.`);
+                    console.error(`[Видео ${index + 1}] ❌ Не удалось найти видео в ответе.`, pollData);
                     return null;
                 }
             }
