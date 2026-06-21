@@ -3,17 +3,15 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VI
 export async function generateVideo(prompt, config) {
     const { count = 1, referenceImages = [] } = config;
 
-    const isImageToVideo = referenceImages.length > 0;
-    const model = isImageToVideo
-        ? "veo-3.1-fast-generate-preview"
-        : "veo-3.1-lite-generate-preview";
+    // Согласно документации, используем основную модель для всех генераций
+    const model = "veo-3.1-generate-preview";
 
     console.log(`=== СТАРТ ГЕНЕРАЦИИ ВИДЕО (Google ${model}) ===`);
 
     let base64Image = null;
     let mimeType = null;
 
-    if (isImageToVideo) {
+    if (referenceImages.length > 0) {
         const imgData = referenceImages[0];
         mimeType = imgData.substring(imgData.indexOf(':') + 1, imgData.indexOf(';'));
         base64Image = imgData.split(',')[1];
@@ -48,9 +46,7 @@ export async function generateVideo(prompt, config) {
                     instances: [instance],
                     parameters: {
                         aspectRatio: "16:9",
-                        resolution: "720p",
-                        durationSeconds: 8,
-                        sampleCount: 1
+                        durationSeconds: "8" // Google требует передавать параметры как строки
                     }
                 })
             });
@@ -88,52 +84,35 @@ export async function generateVideo(prompt, config) {
                         return null;
                     }
 
-                    console.log(`[Видео ${index + 1}] 🎉 ГОТОВО! Видео отрендерено, распаковываем...`);
+                    console.log(`[Видео ${index + 1}] 🎉 ГОТОВО! Ответ от сервера:`, pollData.response);
 
-                    // 🕵️‍♂️ УМНАЯ ИЩЕЙКА ВИДЕО
-                    // Сканируем весь JSON ответа и ищем огромный файл или прямую ссылку
-                    let responseVideo = null;
-                    const findVideoInJSON = (obj) => {
-                        if (!obj || typeof obj !== 'object') return;
-                        for (let key in obj) {
-                            const val = obj[key];
-                            if (typeof val === 'string') {
-                                // Если строка гигантская (> 50 тысяч символов), это 100% наше видео в Base64
-                                if (val.length > 50000) {
-                                    responseVideo = val;
-                                    return;
-                                }
-                                // Если это публичная ссылка на видео
-                                if (val.startsWith('http') && (val.includes('.mp4') || val.includes('video'))) {
-                                    responseVideo = val;
-                                    return;
-                                }
-                            } else if (typeof val === 'object') {
-                                findVideoInJSON(val); // Копаем глубже
-                            }
+                    // 🎯 ТОЧНОЕ ИЗВЛЕЧЕНИЕ ПО ДОКУМЕНТАЦИИ
+                    const generatedVideos = pollData.response?.generatedVideos;
+                    let videoUri = null;
+
+                    if (generatedVideos && generatedVideos.length > 0) {
+                        const videoObj = generatedVideos[0].video;
+
+                        // Если есть прямая ссылка (uri)
+                        if (videoObj?.uri) {
+                            videoUri = videoObj.uri;
                         }
-                    };
-
-                    findVideoInJSON(pollData.response);
-
-                    if (responseVideo) {
-                        if (responseVideo.startsWith('http')) {
-                            // Если это прямая ссылка
-                            if (!responseVideo.includes('key=')) {
-                                responseVideo += (responseVideo.includes('?') ? '&' : '?') + `key=${GEMINI_API_KEY}`;
-                            }
-                            return responseVideo;
-                        }
-                        else {
-                            // Молниеносная конвертация Base64 в Blob без зависания браузера
-                            console.log(`[Видео ${index + 1}] Конвертируем Base64 в .mp4 файл...`);
-                            const res = await fetch(`data:video/mp4;base64,${responseVideo}`);
-                            const blob = await res.blob();
-                            return URL.createObjectURL(blob);
+                        // Если Google вернул только системное имя файла
+                        else if (videoObj?.name) {
+                            videoUri = `https://generativelanguage.googleapis.com/v1beta/${videoObj.name}`;
                         }
                     }
 
-                    console.error(`[Видео ${index + 1}] ❌ Не удалось найти ни ссылку, ни Base64 в ответе!`);
+                    if (videoUri) {
+                        // Файлы Gemini API требуют ключа для скачивания, иначе браузер выдаст 403 Forbidden
+                        if (!videoUri.includes('key=')) {
+                            videoUri += (videoUri.includes('?') ? '&' : '?') + `key=${GEMINI_API_KEY}`;
+                        }
+                        console.log(`[Видео ${index + 1}] 🎥 Итоговая ссылка на скачивание:`, videoUri);
+                        return videoUri;
+                    }
+
+                    console.error(`[Видео ${index + 1}] ❌ Структура ответа изменилась, видео не найдено!`);
                     return null;
                 }
             }
