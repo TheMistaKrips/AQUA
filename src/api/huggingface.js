@@ -3,15 +3,18 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VI
 export async function generateVideo(prompt, config) {
     const { count = 1, referenceImages = [] } = config;
 
-    // Согласно документации, используем основную модель для всех генераций
-    const model = "veo-3.1-generate-preview";
+    // Возвращаем Fast-версию, чтобы видео генерировалось быстрее
+    const isImageToVideo = referenceImages.length > 0;
+    const model = isImageToVideo
+        ? "veo-3.1-fast-generate-preview"
+        : "veo-3.1-lite-generate-preview";
 
     console.log(`=== СТАРТ ГЕНЕРАЦИИ ВИДЕО (Google ${model}) ===`);
 
     let base64Image = null;
     let mimeType = null;
 
-    if (referenceImages.length > 0) {
+    if (isImageToVideo) {
         const imgData = referenceImages[0];
         mimeType = imgData.substring(imgData.indexOf(':') + 1, imgData.indexOf(';'));
         base64Image = imgData.split(',')[1];
@@ -45,8 +48,8 @@ export async function generateVideo(prompt, config) {
                 body: JSON.stringify({
                     instances: [instance],
                     parameters: {
-                        aspectRatio: "16:9",
-                        durationSeconds: "8" // Google требует передавать параметры как строки
+                        aspectRatio: "16:9"
+                        // ⚠️ Убрали durationSeconds, чтобы не ловить 400 Bad Request
                     }
                 })
             });
@@ -84,35 +87,26 @@ export async function generateVideo(prompt, config) {
                         return null;
                     }
 
-                    console.log(`[Видео ${index + 1}] 🎉 ГОТОВО! Ответ от сервера:`, pollData.response);
+                    console.log(`[Видео ${index + 1}] 🎉 ГОТОВО! Ответ от сервера получен.`);
 
-                    // 🎯 ТОЧНОЕ ИЗВЛЕЧЕНИЕ ПО ДОКУМЕНТАЦИИ
-                    const generatedVideos = pollData.response?.generatedVideos;
+                    // 🎯 ИЗВЛЕКАЕМ ВИДЕО ПО ТОЧНОЙ СТРУКТУРЕ REST API
+                    const samples = pollData.response?.generateVideoResponse?.generatedSamples;
                     let videoUri = null;
 
-                    if (generatedVideos && generatedVideos.length > 0) {
-                        const videoObj = generatedVideos[0].video;
-
-                        // Если есть прямая ссылка (uri)
-                        if (videoObj?.uri) {
-                            videoUri = videoObj.uri;
-                        }
-                        // Если Google вернул только системное имя файла
-                        else if (videoObj?.name) {
-                            videoUri = `https://generativelanguage.googleapis.com/v1beta/${videoObj.name}`;
-                        }
+                    if (samples && samples.length > 0) {
+                        videoUri = samples[0]?.video?.uri;
                     }
 
                     if (videoUri) {
-                        // Файлы Gemini API требуют ключа для скачивания, иначе браузер выдаст 403 Forbidden
+                        // Файлам из Gemini Files API нужен ключ для скачивания (обход 403 ошибки)
                         if (!videoUri.includes('key=')) {
                             videoUri += (videoUri.includes('?') ? '&' : '?') + `key=${GEMINI_API_KEY}`;
                         }
-                        console.log(`[Видео ${index + 1}] 🎥 Итоговая ссылка на скачивание:`, videoUri);
+                        console.log(`[Видео ${index + 1}] 🎥 Итоговая ссылка:`, videoUri);
                         return videoUri;
                     }
 
-                    console.error(`[Видео ${index + 1}] ❌ Структура ответа изменилась, видео не найдено!`);
+                    console.error(`[Видео ${index + 1}] ❌ Не удалось извлечь URI видео из структуры REST API!`, pollData);
                     return null;
                 }
             }
