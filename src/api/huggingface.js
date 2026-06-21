@@ -1,17 +1,15 @@
+
+
 export async function generateVideo(prompt, config) {
     const { count = 1, referenceImages = [] } = config;
 
-    console.log("=== СТАРТ ГЕНЕРАЦИИ ВИДЕО (Krea AI через Vercel Прокси) ===");
+    console.log("=== СТАРТ ГЕНЕРАЦИИ ВИДЕО (Krea AI через Прокси) ===");
 
-    // Наш локальный Vercel-эндпоинт (будет работать и на localhost, и на продакшене Vercel)
     const proxyUrl = "/api/krea-proxy";
-
-    // Krea принимает картинку в поле image_url. Извлекаем первую картинку из рефов, если она есть
     const targetImage = referenceImages.length > 0 ? referenceImages[0] : null;
 
     const tasks = Array.from({ length: count }).map(async (_, index) => {
         try {
-            // Делаем небольшую паузу между батчами
             if (index > 0) await new Promise(res => setTimeout(res, index * 1000));
 
             const response = await fetch(proxyUrl, {
@@ -21,40 +19,32 @@ export async function generateVideo(prompt, config) {
                 },
                 body: JSON.stringify({
                     prompt: prompt || "Cinematic video, masterpiece, highly detailed, 8k",
-                    image_url: targetImage, // Передаем картинку (Krea поддерживает base64 или URL)
+                    image_url: targetImage,
                     frames: 30,
                     fps: 8
                 }),
             });
 
+            // Если прокси вернул ошибку
             if (!response.ok) {
                 const errData = await response.json().catch(() => ({}));
-                throw new Error(errData.error || `Ошибка сервера со статусом: ${response.status}`);
+                console.error(`[Видео ${index + 1}] ❌ Полные детали ошибки от сервера:`, errData);
+                throw new Error(errData.error || `Ошибка сервера: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log(`[Видео ${index + 1}] ✅ Задача на рендер успешно создана в Krea!`, data);
+            console.log(`[Видео ${index + 1}] ✅ Ответ от Krea успешный:`, data);
 
-            // ⚠️ ВАЖНО: Krea AI возвращает ссылку на готовое видео не сразу, а через время!
-            // Для беты мы сразу возвращаем финальную ссылку из ответа (например, data.uri или data.url)
-            // Если Krea возвращает объект со статусом, вернем ссылку на видео файл:
+            // Вытаскиваем ссылку на видео
             const videoUrl = data.url || data.uri || data.video_url;
-
-            if (!videoUrl) {
-                console.warn(`[Видео ${index + 1}] Krea приняла задачу, но не выдала прямую ссылку. Возвращаем ID задачи:`, data.id);
-                // Если Krea возвращает асинхронный ID, используем временную заглушку или ID
-                return null;
-            }
-
-            return videoUrl;
+            return videoUrl || null;
 
         } catch (error) {
-            console.error(`[Видео ${index + 1}] ❌ Ошибка генерации:`, error.message);
+            console.error(`[Видео ${index + 1}] ❌ Сбой генерации:`, error.message);
             return null;
         }
     });
 
     const results = await Promise.all(tasks);
-    // Фильтруем пустые результаты, чтобы сетка не ломалась
     return results.filter(url => url !== null);
 }
