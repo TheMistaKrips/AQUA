@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Folder, Edit2, Trash2, Check, Bot, X } from 'lucide-react';
+import aquaLogo from '../assets/AQUA.png';
 import '../styles/Sidebar.css';
 
 export default function Sidebar({ projects, activeProjectId, setActiveProjectId, createProject, renameProject, deleteProject, isOpen, toggleSidebar }) {
@@ -14,7 +15,10 @@ export default function Sidebar({ projects, activeProjectId, setActiveProjectId,
             <div className={`sidebar-backdrop ${isOpen ? 'active' : ''}`} onClick={toggleSidebar}></div>
             <div className={`sidebar glass-panel ${isOpen ? 'open' : 'closed'}`}>
                 <div className="sidebar-header">
-                    <div className="logo">AQUA</div>
+                    <div className="logo">
+                        <img src={aquaLogo} alt="AQUA Logo" className="logo-image" />
+                        AQUA
+                    </div>
                     <button className="mobile-close-btn" onClick={toggleSidebar}><X size={20} /></button>
                 </div>
 

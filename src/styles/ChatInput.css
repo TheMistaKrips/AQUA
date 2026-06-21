@@ -57,6 +57,15 @@
     flex-shrink: 0;
 }
 
+.icon-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.active-icon {
+    color: var(--accent-aqua);
+}
+
 .send-btn {
     background: rgba(255, 255, 255, 0.1);
     color: var(--text-primary);
@@ -68,6 +77,99 @@
     justify-content: center;
     margin-left: 8px;
     flex-shrink: 0;
+}
+
+.send-btn:hover {
+    background: var(--text-primary);
+    color: var(--bg-dark);
+}
+
+/* ВОССТАНОВЛЕНИЕ ПАНЕЛИ НАСТРОЕК */
+.settings-panel {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    padding: 20px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: rgba(18, 22, 30, 0.95);
+    border: 1px solid var(--glass-border);
+    z-index: 100;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.setting-group label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.buttons-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.buttons-row button {
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.buttons-row button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.buttons-row button.active {
+    color: white;
+    background: rgba(56, 189, 248, 0.2);
+    border-color: var(--accent-aqua);
+}
+
+.references-preview {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    overflow-x: auto;
+}
+
+.ref-thumb {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.ref-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.del-ref {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (max-width: 768px) {
@@ -90,11 +192,18 @@
         font-size: 16px;
     }
 
-    /* 16px блокирует автозум в iOS */
     .icon-btn,
     .send-btn {
         width: 36px;
         height: 36px;
         padding: 8px;
+    }
+
+    .settings-panel {
+        left: 0;
+        right: 0;
+        width: 100%;
+        bottom: 65px;
+        border-radius: 16px 16px 0 0;
     }
 }

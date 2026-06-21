@@ -34,6 +34,7 @@
     align-items: center;
 }
 
+/* КРУГЛЫЙ ЛОГОТИП AQUA */
 .logo {
     font-size: 20px;
     font-weight: 700;
@@ -43,14 +44,14 @@
     gap: 12px;
 }
 
-.logo::before {
-    content: '';
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    background: var(--accent-aqua);
-    border-radius: 4px;
-    box-shadow: 0 0 10px var(--accent-aqua);
+.logo-image {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid rgba(56, 189, 248, 0.5);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    background-color: var(--bg-dark);
 }
 
 .mobile-close-btn {
@@ -83,10 +84,19 @@
     border: 1px solid var(--glass-border);
 }
 
+.new-project-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .new-agent-btn {
     background: linear-gradient(135deg, rgba(0, 225, 255, 0.2), rgba(0, 163, 255, 0.1));
     color: var(--accent-aqua);
     border: 1px solid rgba(0, 225, 255, 0.2);
+}
+
+.new-agent-btn:hover {
+    background: rgba(0, 225, 255, 0.25);
+    box-shadow: 0 0 15px rgba(0, 225, 255, 0.2);
 }
 
 .list-title {
@@ -107,6 +117,11 @@
     position: relative;
     transition: all 0.2s;
     cursor: pointer;
+}
+
+.project-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
 }
 
 .project-item.active {
@@ -147,6 +162,39 @@
     border-radius: 6px;
 }
 
+.proj-actions button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.proj-actions button.danger:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.edit-mode {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    gap: 8px;
+}
+
+.edit-mode input {
+    flex-grow: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--accent-aqua);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    width: 100px;
+}
+
+.edit-mode button {
+    color: var(--accent-aqua);
+}
+
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
@@ -158,6 +206,7 @@
         margin: 0 !important;
         transform: translateX(-100%);
         opacity: 1 !important;
+        z-index: 1000;
     }
 
     .sidebar.open {
@@ -191,5 +240,8 @@
 
     .mobile-close-btn {
         display: block;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px;
+        border-radius: 8px;
     }
 }

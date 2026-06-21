@@ -6,16 +6,32 @@ import '../styles/LoginScreen.css';
 export default function LoginScreen({ onLogin }) {
     const [inputKey, setInputKey] = useState('');
     const [error, setError] = useState(false);
+    const [errorText, setErrorText] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const cleanKey = inputKey.trim();
 
+        // Получаем список "сожженных" ключей на этом устройстве
+        const burnedKeys = JSON.parse(localStorage.getItem('aqua_burned_keys') || '[]');
+
+        if (burnedKeys.includes(cleanKey)) {
+            setErrorText('Этот ключ уже был использован и сгорел!');
+            setError(true);
+            return;
+        }
+
         if (keysData.validKeys.includes(cleanKey)) {
-            // Ключ верный. Выдаем вечный пропуск на это устройство.
-            localStorage.setItem('aqua_session_active', 'true');
+            // Сохраняем ключ для доступа
+            localStorage.setItem('aqua_access_key', cleanKey);
+
+            // "Сжигаем" ключ локально, чтобы нельзя было использовать повторно тут же
+            burnedKeys.push(cleanKey);
+            localStorage.setItem('aqua_burned_keys', JSON.stringify(burnedKeys));
+
             onLogin();
         } else {
+            setErrorText('Неверный ключ доступа!');
             setError(true);
             setInputKey('');
         }
@@ -37,7 +53,7 @@ export default function LoginScreen({ onLogin }) {
                         className={error ? 'error-shake' : ''}
                         autoFocus
                     />
-                    {error && <span className="error-text">Неверный ключ доступа!</span>}
+                    {error && <span className="error-text">{errorText}</span>}
 
                     <button type="submit" className="login-btn">Войти</button>
                 </form>
