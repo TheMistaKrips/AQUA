@@ -3,10 +3,10 @@ import { Download, CopyPlus, RefreshCcw, Trash2, X, BookmarkPlus } from 'lucide-
 import '../styles/ImageModal.css';
 
 export default function ImageModal({ image, onClose, onDelete, onRegenerate, onUseAsReference, onAddToBaseRefs }) {
-    const downloadImage = () => {
+    const downloadMedia = () => {
         const a = document.createElement('a');
         a.href = image.url;
-        a.download = `AQUA_${image.id}.jpg`;
+        a.download = `AQUA_${image.id}.${image.mediaType === 'video' ? 'mp4' : 'jpg'}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -14,16 +14,17 @@ export default function ImageModal({ image, onClose, onDelete, onRegenerate, onU
 
     return (
         <div className="modal-backdrop" onClick={onClose}>
-            {/* ИСПРАВЛЕНИЕ: Добавлен явный onClick с остановкой всплытия */}
-            <button
-                className="close-modal"
-                onClick={(e) => { e.stopPropagation(); onClose(); }}
-            >
+            <button className="close-modal" onClick={(e) => { e.stopPropagation(); onClose(); }}>
                 <X size={28} />
             </button>
 
             <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <img src={image.url} alt="Fullscreen" className="modal-image" />
+
+                {image.mediaType === 'video' ? (
+                    <video src={image.url} controls autoPlay loop playsInline className="modal-image" />
+                ) : (
+                    <img src={image.url} alt="Fullscreen" className="modal-image" />
+                )}
 
                 <div className="modal-actions glass-panel">
                     {image.type === 'generated' && (
@@ -32,17 +33,19 @@ export default function ImageModal({ image, onClose, onDelete, onRegenerate, onU
                         </button>
                     )}
 
-                    <button className="action-btn" onClick={onUseAsReference} title="Добавить в промпт">
-                        <CopyPlus size={20} /> <span>В промпт</span>
-                    </button>
+                    {image.mediaType !== 'video' && (
+                        <button className="action-btn" onClick={onUseAsReference} title="Добавить в промпт">
+                            <CopyPlus size={20} /> <span>В промпт</span>
+                        </button>
+                    )}
 
-                    {onAddToBaseRefs && (
+                    {onAddToBaseRefs && image.mediaType !== 'video' && (
                         <button className="action-btn" onClick={onAddToBaseRefs} title="Сохранить как Базовый Референс для Агента">
                             <BookmarkPlus size={20} /> <span>В Базовые Рефы</span>
                         </button>
                     )}
 
-                    <button className="action-btn" onClick={downloadImage} title="Скачать">
+                    <button className="action-btn" onClick={downloadMedia} title="Скачать">
                         <Download size={20} /> <span>Скачать</span>
                     </button>
 

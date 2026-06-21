@@ -55,6 +55,9 @@
     padding: 10px;
     border-radius: 12px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .icon-btn:hover {
@@ -89,11 +92,10 @@
     cursor: not-allowed;
 }
 
-/* ИСПРАВЛЕННАЯ ПАНЕЛЬ НАСТРОЕК */
+/* ПАНЕЛЬ НАСТРОЕК */
 .settings-panel {
     position: absolute;
     bottom: calc(100% + 15px);
-    /* Всегда ровно над инпутом */
     right: 0;
     padding: 20px;
     border-radius: 16px;
@@ -105,8 +107,8 @@
     z-index: 1000;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(20px);
-    width: 320px;
-    /* Жесткая ширина, чтобы не плющило текст */
+    width: 340px;
+    /* Чуть шире для новых кнопок */
 }
 
 .setting-group label {
@@ -126,6 +128,10 @@
 }
 
 .buttons-row button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Центрируем иконки и текст */
     padding: 8px 14px;
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid rgba(255, 255, 255, 0.1);

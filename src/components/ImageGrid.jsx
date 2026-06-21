@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, Edit2, Check, X, Image as ImageIcon } from 'lucide-react';
+import { Trash2, Edit2, Check, X, Image as ImageIcon, Film } from 'lucide-react';
 import '../styles/ImageGrid.css';
 
 export default function ImageGrid({ images, onImageClick, onUpdateName, onDelete, gridScale = 250 }) {
@@ -39,7 +39,7 @@ export default function ImageGrid({ images, onImageClick, onUpdateName, onDelete
                     {img.type === 'generating' ? (
                         <div className="generating-placeholder">
                             <div className="loader"></div>
-                            <span className="gen-text">Генерация...</span>
+                            <span className="gen-text">{img.mediaType === 'video' ? 'Рендер видео...' : 'Генерация...'}</span>
                         </div>
                     ) : img.type === 'placeholder' ? (
                         <div className="empty-placeholder">
@@ -48,7 +48,13 @@ export default function ImageGrid({ images, onImageClick, onUpdateName, onDelete
                         </div>
                     ) : (
                         <>
-                            <img src={img.url} alt={img.name} loading="lazy" />
+                            {/* Рендерим видео или картинку в зависимости от типа */}
+                            {img.mediaType === 'video' ? (
+                                <video src={img.url} autoPlay loop muted playsInline className="card-media" />
+                            ) : (
+                                <img src={img.url} alt={img.name} loading="lazy" className="card-media" />
+                            )}
+
                             <div className="card-overlay">
                                 {editingId === img.id ? (
                                     <div className="name-edit" onClick={e => e.stopPropagation()}>
@@ -63,6 +69,7 @@ export default function ImageGrid({ images, onImageClick, onUpdateName, onDelete
                                     </div>
                                 ) : (
                                     <div className="name-display">
+                                        {img.mediaType === 'video' && <Film size={14} style={{ marginRight: 6, color: 'var(--accent-aqua)', flexShrink: 0 }} />}
                                         <span className="img-name" title={img.name}>{img.name}</span>
                                         <div className="card-actions" onClick={e => e.stopPropagation()}>
                                             <button onClick={(e) => startEditing(e, img)} title="Переименовать"><Edit2 size={14} /></button>
