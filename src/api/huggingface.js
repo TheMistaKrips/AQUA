@@ -6,7 +6,7 @@ export async function generateVideo(prompt, config) {
     // Возвращаем Fast-версию, чтобы видео генерировалось быстрее
     const isImageToVideo = referenceImages.length > 0;
     const model = isImageToVideo
-        ? "veo-3.1-fast-generate-preview"
+        ? "veo-3.1-lite-generate-preview"
         : "veo-3.1-lite-generate-preview";
 
     console.log(`=== СТАРТ ГЕНЕРАЦИИ ВИДЕО (Google ${model}) ===`);
@@ -48,7 +48,10 @@ export async function generateVideo(prompt, config) {
                 body: JSON.stringify({
                     instances: [instance],
                     parameters: {
-                        aspectRatio: "16:9"
+                        aspectRatio: "9:16",
+                        resolution: "720p",
+                        durationSeconds: 6,
+
                         // ⚠️ Убрали durationSeconds, чтобы не ловить 400 Bad Request
                     }
                 })
