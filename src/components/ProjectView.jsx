@@ -4,11 +4,17 @@ import ChatInput from './ChatInput';
 import { Search, X, ZoomIn, ZoomOut, Menu } from 'lucide-react';
 import '../styles/ProjectView.css';
 
-export default function ProjectView({ project, onImagesAdded, onPlaceholdersResolved, onImageUpdateName, onImageDelete, onImageClick, restorePromptData, clearRestoreData, onRegenerate, toggleSidebar }) {
+export default function ProjectView({
+    project, onImagesAdded, onPlaceholdersResolved,
+    onImageUpdateName, onImageDelete, onImageClick,
+    restorePromptData, clearRestoreData, onRegenerate, toggleSidebar
+}) {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearchActive, setIsSearchActive] = useState(false);
     const [gridScale, setGridScale] = useState(250);
-    const filteredImages = project.images.filter(img => img.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const safeImages = project.images || [];
+    const filteredImages = safeImages.filter(img => img.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
         <div className="project-view">
@@ -30,8 +36,27 @@ export default function ProjectView({ project, onImagesAdded, onPlaceholdersReso
                     </div>
                 </div>
             </div>
-            <div className="grid-scroll-area"><ImageGrid images={filteredImages} onImageClick={onImageClick} onUpdateName={onImageUpdateName} onDelete={onImageDelete} gridScale={gridScale} /></div>
-            <div className="chat-area"><ChatInput onImagesAdded={onImagesAdded} onPlaceholdersResolved={onPlaceholdersResolved} restorePromptData={restorePromptData} clearRestoreData={clearRestoreData} onRegenerate={onRegenerate} /></div>
+
+            <div className="grid-scroll-area">
+                <ImageGrid
+                    images={filteredImages}
+                    onImageClick={onImageClick}
+                    onUpdateName={onImageUpdateName}
+                    onDelete={onImageDelete}
+                    onRegenerate={onRegenerate}
+                    onUseAsReference={(url) => onRegenerate({ text: '', refs: [url] })}
+                    gridScale={gridScale}
+                />
+            </div>
+
+            <div className="chat-area">
+                <ChatInput
+                    onImagesAdded={onImagesAdded}
+                    onPlaceholdersResolved={onPlaceholdersResolved}
+                    restorePromptData={restorePromptData}
+                    clearRestoreData={clearRestoreData}
+                />
+            </div>
         </div>
     );
 }
