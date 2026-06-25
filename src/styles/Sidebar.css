@@ -107,6 +107,10 @@
     letter-spacing: 1px;
 }
 
+.projects-list {
+    margin-bottom: 24px;
+}
+
 .project-item {
     padding: 12px;
     border-radius: 12px;
@@ -193,6 +197,69 @@
 
 .edit-mode button {
     color: var(--accent-aqua);
+}
+
+/* СЕКЦИЯ КОНТАКТОВ */
+.contacts-section {
+    margin-top: auto;
+    padding: 16px 0 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contacts-title {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    padding-left: 8px;
+    letter-spacing: 1px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.contact-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.contact-icon {
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.telegram-contact:hover {
+    background: rgba(0, 136, 204, 0.1);
+    color: #0088cc;
+}
+
+.telegram-contact:hover .contact-icon {
+    opacity: 1;
+    color: #0088cc;
+}
+
+.website-contact:hover {
+    background: rgba(0, 225, 255, 0.1);
+    color: var(--accent-aqua);
+}
+
+.website-contact:hover .contact-icon {
+    opacity: 1;
+    color: var(--accent-aqua);
+}
+
+.contact-text {
+    font-size: 13px;
+    font-weight: 500;
 }
 
 @media (max-width: 768px) {

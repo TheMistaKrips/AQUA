@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Folder, Edit2, Trash2, Check, Bot, X } from 'lucide-react';
+import { Plus, Folder, Edit2, Trash2, Check, Bot, X, MessageCircle, Globe } from 'lucide-react';
 import aquaLogo from '../assets/AQUA.png';
 import '../styles/Sidebar.css';
 
@@ -48,6 +48,28 @@ export default function Sidebar({ projects, activeProjectId, setActiveProjectId,
                             )}
                         </div>
                     ))}
+                </div>
+
+                <div className="contacts-section">
+                    <div className="contacts-title">CONTACTS</div>
+                    <a
+                        href="https://t.me/fetisovdev"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="contact-item telegram-contact"
+                    >
+                        <MessageCircle size={16} className="contact-icon" />
+                        <span className="contact-text">Telegram</span>
+                    </a>
+                    <a
+                        href="https://satisfied-champagne-810816.framer.app"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="contact-item website-contact"
+                    >
+                        <Globe size={16} className="contact-icon" />
+                        <span className="contact-text">Website</span>
+                    </a>
                 </div>
             </div>
         </>
